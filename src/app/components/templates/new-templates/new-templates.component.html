@@ -1,0 +1,141 @@
+<div class="row">
+    <div class="col-6">
+        <div class="card">
+            <h6 class="card-header">Nuevo Template</h6>
+            <div id="newTemplate" class="card-body">
+                <p>Partidos Seleccionados:</p>
+                <ul class="list-group" *ngFor="let lm of listMatches | filterCodeTemplate:codeTemplate">
+                    <li class="list-group-item item mb-2 pt-0 pb-0">
+                        <div class="form-inline float-left pt-0">
+                            <p class="mr-2 pt-3">{{lm.homeTeamAlias}}</p>
+                            <img alt="" class="mr-3" height="30" src="{{lm.homeTeamFlag}}" width="30">
+                            <p class="mr-3 pt-3 font-weight-bold">Vs</p>
+                            <img alt="" class="mr-2" height="30" src="{{lm.visitTeamFlag}}" width="30">
+                            <p class="pt-3 mr-4">{{lm.visitTeamAlias}}</p>
+                            <p class="pt-3">{{lm.startDate.toDate() | date:'d/M/yy - HH:mm'}}</p>
+                        </div>
+                        <button
+                            (click)="delete(lm.id)"
+                            class="btn btn-danger btn-sm float-right mt-2"
+                            type="button"
+                        >
+                            Quitar
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-footer">
+                <form (ngSubmit)="addTemplate(flagUrl)">
+                    <div class="form-row">
+                        <input
+                            [(ngModel)]="newTemplate.name"
+                            class="form-control"
+                            id="lbl-name"
+                            name="name"
+                            placeholder="Nombre del Template"
+                            type="text"
+                        >
+                    </div>
+                    <br>
+                    <!-- DATE TIME -->
+                    <div class="form-row">
+                        <div class="col-3">
+                            <p>Fecha/Hora Limite:</p>
+                        </div>
+                        <div class="col-9">
+                            <div class="input-group mr-2">
+                                <input
+                                    class="form-control"
+                                    placeholder="{{newTemplate.limitDate}}"
+                                    name="startDate"
+                                    [minDate]="minDate"
+                                    ngbDatepicker #d="ngbDatepicker"
+                                    (dateSelect)="updateDateMatch($event)"
+                                >
+                                <div class="input-group-append">
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-secondary calendar"
+                                        (click)="d.toggle()"
+                                    >
+                                    </button>
+                                </div>
+                                <input
+                                    type="time"
+                                    class="form-control"
+                                    name="startTime"
+                                    value="{{matchTimeLimit}}"
+                                    (change)="updateTimeMatch($event.target)"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-group text-center">
+                        <label for="lbl_flag">Seleccionar Banner Template:</label>
+                        <input
+                            #flag
+                            (change)="onFlagSelected($event)"
+                            class="d-none"
+                            id="lbl_flag"
+                            type="file"
+                        >
+                        <div class="div d-block d-flex justify-content-center">
+                            <img
+                                (click)="flag.click()"
+                                [src]="flagSelected || '../../../assets/images/banner.png'"
+                                alt="No-Image"
+                                width="150"
+                            >
+                        </div>
+                        <small class="text-muted">Las imagenes deben medir 300x200 pixeles y en formato .PNG</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="lbl-flagUrl">Escudo url:</label>
+                        <input
+                            #flagUrl
+                            class="form-control"
+                            disabled
+                            id="lbl-flagUrl"
+                            name="flagUrl"
+                            type="text"
+                            value="{{downloadURL | async}}"
+                        >
+                    </div>
+                    <button
+                        class="btn btn-primary btn-block"
+                        type="submit"
+                    >
+                        Guardar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <h6 class="card-header">Partidos Sueltos</h6>
+            <div id="listMatches" class="card-body">
+                <ul *ngFor="let m of matches | filterStatus:'1' | filterPublish: true" class="list-group">
+                    <li class="list-group-item item mb-2 pt-0 pb-0">
+                        <button
+                            (click)="addList($event, m, codeTemplate)"
+                            class="btn btn-success btn-sm float-left mt-2"
+                            type="button"
+                        >
+                            Seleccionar
+                        </button>
+                        <div class="form-inline float-right pt-0">
+                            <p class="mr-2 pt-3">{{m.homeTeamAlias}}</p>
+                            <img alt="" class="mr-3" height="30" src="{{m.homeTeamFlag}}" width="30">
+                            <p class="mr-3 pt-3 font-weight-bold">Vs</p>
+                            <img alt="" class="mr-2" height="30" src="{{m.visitTeamFlag}}" width="30">
+                            <p class="pt-3 mr-4">{{m.visitTeamAlias}}</p>
+                            <p class="pt-3">{{m.startDate.toDate() | date:'d/M/yy - HH:mm'}}</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

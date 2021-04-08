@@ -1,0 +1,47 @@
+<div class="row">
+    <div class="col-6">
+        <div class="card">
+            <h6 class="card-header">Registro Historico de Templates</h6>
+            <div class="card-body">
+                <div *ngIf="templates.length > 0; else none">
+                    <p>Seleccionar una template para ver los partidos que contiene:</p>
+                    <ul *ngFor="let t of templates | filterFiled:true" class="list-group">
+                        <li class="list-group-item item mb-2 p-2">
+                            <a (click)="showMatches(t.codePenka)" type="button">{{t.name}}</a>
+                            <button
+                                (click)="delete(t.id)"
+                                class="btn btn-danger btn-sm mr-2 float-right"
+                                type="button"
+                            >
+                                Borrar
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <ng-template #none>
+                    <p>No hay templates registrados aun.</p>
+                </ng-template>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <h6 class="card-header">Lista de Partidos</h6>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li *ngFor="let lm of listMatches | filterCodePenka:codePenka"
+                        class="list-group-item p-2 d-flex d-inline">
+                        <p class="mr-2 pt-2">{{lm.homeTeamAlias}}</p>
+                        <img alt="" class="mr-3" height="30" src="{{lm.homeTeamFlag}}" width="30">
+                        <p class="mr-3 pt-2">Vs</p>
+                        <img alt="" class="mr-2" height="30" src="{{lm.visitTeamFlag}}" width="30">
+                        <p class="pt-2 mr-4">{{lm.visitTeamAlias}}</p>
+                        <p class="pt-2">{{lm.startDate}} &nbsp;-&nbsp; {{lm.startTime}}</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

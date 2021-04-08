@@ -1,0 +1,82 @@
+<div class="row">
+    <div class="col-4">
+        <div class="card">
+            <div class="card-header">
+                <h6>Nuevo Tipo de Partido</h6>
+            </div>
+            <div class="card-body">
+                <form (ngSubmit)="add()">
+                    <div class="form-group">
+                        <label for="lbl-name">Tipo de Partido:</label>
+                        <input
+                            type="text"
+                            id="lbl-name"
+                            class="form-control"
+                            placeholder="Ej: Partido ida y vuelta"
+                            name="name"
+                            [(ngModel)]="typeMatch.name"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="lbl-nMatches">Nº de partidos</label>
+                        <input
+                            type="number"
+                            id="lbl-nMatches"
+                            class="form-control"
+                            name="nMatches"
+                            [(ngModel)]="typeMatch.nMatches"
+                        >
+                    </div>
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-block"
+                    >
+                        Guardar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-8">
+        <div class="card">
+            <div class="card-header">
+                <h6>Listado</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive" *ngIf="typeMatches?.length > 0; else none">
+                    <table class="table table-bordered table-striped table-sm">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Tipo de Partido</th>
+                            <th>Nº de partidos</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let t of typeMatches">
+                            <td>
+                                <button
+                                    type="button"
+                                    class="btn btn-danger btn-sm"
+                                    (click)="delete($event, t)"
+                                >
+                                    <svg width="1.2em" height="1.2em" viewBox="0 0 16 16" class="bi bi-trash-fill"
+                                         fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd"
+                                              d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"/>
+                                    </svg>
+                                </button>
+                            </td>
+                            <td>{{t.name}}</td>
+                            <td>{{t.nMatches}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <ng-template #none>
+                    <p>No se encontraron registros.</p>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,153 @@
+<div class="row">
+    <div class="col-lg-1">
+        <div class="toolbar-title">
+            <p>Filtros:</p>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="toolbar-content">
+            <select class="form-control" name="" id="">
+                <option value="" selected>Competiciones</option>
+                <option *ngFor="let c of competitions" value="{{c.name}}">
+                    {{c.name}}
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="toolbar-content">
+            <input type="text" placeholder="Buscar por equipo, liga o competicion">
+        </div>
+    </div>
+</div>
+<br>
+<div class="row">
+    <div class="col-lg-12">
+
+        <div class="card">
+            <h6 class="card-header">Partidos Sueltos</h6>
+
+            <div class="card-body">
+                <ul class="list-matches">
+                    <li class="item-matches" *ngFor="let sm of singleMatches">
+                        <div class="form-inline">
+                            <div class="input-group mr-2">
+                                <input
+                                    class="form-control form-control-sm {{sm.selected}}"
+                                    placeholder="{{sm.startDate.toDate() | date:'dd-MM-yyyy'}}"
+                                    name="dp{{sm.id}}"
+                                    ngbDatepicker #d="ngbDatepicker"
+                                    (dateSelect)="updateDateMatch($event, sm.id)"
+                                    disabled
+                                >
+                                <div class="input-group-append">
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-secondary calendar"
+                                        (click)="d.toggle()"
+                                        disabled
+                                    >
+                                    </button>
+                                </div>
+                            </div>
+                            <input
+                                type="time"
+                                class="form-control form-control-sm mr-2"
+                                name="{{sm.id}}"
+                                value="{{sm.startDate.toDate() | date:'HH:mm'}}"
+                                (change)="updateTimeMatch($event.target, sm.id)"
+                                disabled
+                            >
+
+                            <select
+                                name="{{sm.id}}"
+                                class="form-control form-control-sm mr-2"
+                                (change)="gameStatus($event.target, sm)"
+                            >
+                                <div *ngIf="sm.status === '2'; then done else toPlay"></div>
+
+                                <ng-template #done>
+                                    <option value="1">Por Jugarse</option>
+                                    <option value="2" selected>Terminado</option>
+                                </ng-template>
+
+                                <ng-template #toPlay>
+                                    <option value="1" selected>Por Jugarse</option>
+                                    <option value="2">Terminado</option>
+                                </ng-template>
+
+                            </select>
+                            <ng-container *ngIf="sm.publish === true; else noPublish">
+                                <button
+                                    type="button"
+                                    class="btn btn-success btn-sm mr-4 p-1"
+                                    (click)="publish(sm.id)"
+                                    disabled
+                                >
+                                    Publicar
+                                </button>
+                            </ng-container>
+                            <ng-template #noPublish>
+                                <button
+                                    type="button"
+                                    class="btn btn-success btn-sm mr-4 p-1"
+                                    (click)="publish(sm.id)"
+                                >
+                                    Publicar
+                                </button>
+                            </ng-template>
+
+                            <!-- Home Team -->
+                            <img src="{{sm.homeTeamFlag}}" width="30" height="30" class="ml-4 mr-2">
+                            <p class="mr-2 mt-3">{{sm.homeTeamAlias}}</p>
+                            <!-- Score-->
+                            <select
+                                name="{{sm.id}}"
+                                class="form-control form-control-sm mr-2"
+                                (change)="updateHomeScore($event.target, sm.id)"
+                            >
+                                <option value="{{sm.homeTeamScore}}">{{sm.homeTeamScore}}</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                            </select>
+                            <!--///////-->
+                            <p class="mr-2 font-weight-bold mt-3"> Vs </p>
+
+                            <!-- Visit Team -->
+                            <!-- Score -->
+                            <select
+                                name="{{sm.id}}"
+                                class="form-control form-control-sm mr-2"
+                                (change)="updateVisitScore($event.target, sm.id)"
+                            >
+                                <option value="{{sm.visitTeamScore}}">{{sm.visitTeamScore}}</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                            </select>
+                            <p class="mr-2 mt-3">{{sm.visitTeamAlias}}</p>
+
+                            <img src="{{sm.visitTeamFlag}}" width="30" height="30" class="mr-2">
+                        </div>
+
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

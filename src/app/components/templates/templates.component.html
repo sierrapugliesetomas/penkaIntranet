@@ -1,0 +1,83 @@
+<div class="row">
+    <div class="col-6">
+        <div class="card">
+            <h6 class="card-header">Templates Actuales</h6>
+            <div class="card-body">
+                <div *ngIf="templates.length > 0; else none">
+                    <p>Seleccionar una template para ver los partidos que contiene:</p>
+                    <ul class="list-group">
+                        <li class="list-group-item item mb-2 p-2" *ngFor="let t of templates | filterFiled:false">
+                            <a (click)="showMatches(t.codeTemplate)" type="button">{{t.name}}</a>
+                            <div *ngIf="t.publish === false; else disable">
+                                <button
+                                    (click)="publish(t.id)"
+                                    class="btn btn-success btn-sm float-right"
+                                    type="button"
+                                >
+                                    Publicar
+                                </button>
+                                <button
+                                    (click)="delete(t.id)"
+                                    class="btn btn-danger btn-sm mr-2 float-right"
+                                    type="button"
+                                >
+                                    Borrar
+                                </button>
+                            </div>
+                            <ng-template #disable>
+                                <button
+                                    (click)="publish(t.id)"
+                                    class="btn btn-success btn-sm float-right"
+                                    disabled
+                                    type="button"
+                                >
+                                    Publicar
+                                </button>
+                                <button
+                                    (click)="delete(t.id)"
+                                    class="btn btn-danger btn-sm mr-2 float-right"
+                                    disabled
+                                    type="button"
+                                >
+                                    Borrar
+                                </button>
+                            </ng-template>
+                            <button
+                                (click)="stock(t.id)"
+                                class="btn btn-secondary btn-sm mr-2 float-right"
+                                type="button"
+                            >
+                                Archivar
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <ng-template #none>
+                    <p>No hay templates registrados aun.</p>
+                </ng-template>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <h6 class="card-header">Lista de Partidos</h6>
+            <div class="card-body">
+                <ng-container *ngIf="this.codeTemplate">
+                    <ul class="list-group">
+                        <li *ngFor="let lm of listMatches | filterCodeTemplate:codeTemplate"
+                            class="list-group-item p-2 d-flex d-inline">
+                            <p class="mr-2 pt-2">{{lm.homeTeamAlias}}</p>
+                            <img alt="" class="mr-3" height="30" src="{{lm.homeTeamFlag}}" width="30">
+                            <p class="mr-3 pt-2">Vs</p>
+                            <img alt="" class="mr-2" height="30" src="{{lm.visitTeamFlag}}" width="30">
+                            <p class="pt-2 mr-4">{{lm.visitTeamAlias}}</p>
+                            <p class="pt-2">{{lm.startDate.toDate() | date:'d/M/yy - HH:mm'}}</p>
+                        </li>
+                    </ul>
+                </ng-container>
+            </div>
+        </div>
+    </div>
+</div>

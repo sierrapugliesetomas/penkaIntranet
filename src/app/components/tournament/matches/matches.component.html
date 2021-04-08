@@ -1,0 +1,146 @@
+<div class="row">
+    <div class="col-12">
+        <div class="accordion" id="accordionExample">
+            <div *ngFor="let g of groups | filterTournament:tournament.name; index as y" class="card">
+                <div class="card-header" id="heading{{y}}">
+                    <h2 class="mb-0">
+                        <button aria-expanded="false" attr.aria-controls="collapse{{y}}" attr.data-target="#collapse{{y}}"
+                                class="btn btn-link btn-block text-left collapsed" data-toggle="collapse"
+                                type="button">
+                            <h6>{{g.name}}</h6>
+                        </button>
+                    </h2>
+                </div>
+                <div attr.aria-labelledby="heading{{y}}" class="collapse" data-parent="#accordionExample"
+                     id="collapse{{y}}">
+                    <div class="card-body">
+                        <ul *ngFor="let m of matches | filterGroup:g.name | filterTournament:tournament.name; index as x"
+                            class="list-group mb-2">
+
+                            <!-- Match -->
+                            <li class="list-group-item border-0">
+                                <div class="form-inline">
+
+                                    <div class="mr-4">Partido {{ x + 1}}</div>
+                                    <!-- Date and time pickers -->
+                                    <div class=" input-group mr-2">
+                                        <input
+                                            #d="ngbDatepicker"
+                                            (dateSelect)="updateDateMatch($event, m.id)"
+                                            class="form-control form-control-sm"
+                                            name="dp{{m.id}}" ngbDatepicker
+                                            placeholder="{{m.startDate}}"
+                                        >
+                                        <div class="input-group-append">
+                                            <button
+                                                (click)="d.toggle()"
+                                                class="btn btn-outline-secondary calendar"
+                                                type="button"
+                                            >
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <input
+                                        (change)="updateTimeMatch($event.target, m.id)"
+                                        class="form-control form-control-sm mr-2"
+                                        name="{{m.id}}"
+                                        type="time"
+                                        value="{{m.startTime}}"
+                                    >
+
+                                    <!-- Home Team -->
+                                    <img class="mr-2" src="{{m.homeFlag}}" width="30">
+                                    <!-- Select Country -->
+                                    <select
+                                        (change)="updateHomeTeam($event.target, m.id)"
+                                        class="form-control form-control-sm mr-2"
+                                        name="{{m.id}}"
+                                    >
+                                        <option value="">{{m.homeTeamName}}</option>
+                                        <option
+                                            *ngFor="let t of teams | filterGroup:g.name | filterTournament:tournament.name"
+                                            value="{{t.teamId}}">{{t.teamName}}</option>
+                                    </select>
+                                    <!-- Score-->
+                                    <select
+                                        (change)="updateHomeScore($event.target, m.id)"
+                                        class="form-control form-control-sm"
+                                        name="{{m.id}}"
+                                    >
+                                        <option value="{{m.homeScore}}">{{m.homeScore}}</option>
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                    </select>
+                                    <!--/////////////////////////////////////////////////////////////-->
+                                    <div class="ml-2 mr-2 font-weight-bold">Vs</div>
+
+                                    <!-- Visit Team -->
+                                    <!-- Score -->
+                                    <select
+                                        (change)="updateVisitScore($event.target, m.id)"
+                                        class="form-control form-control-sm mr-2"
+                                        name="{{m.id}}"
+                                    >
+                                        <option value="{{m.visitScore}}">{{m.visitScore}}</option>
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                    </select>
+                                    <!-- Select Country -->
+                                    <select
+                                        (change)="updateVisitTeam($event.target, m.id)"
+                                        class="form-control form-control-sm mr-2"
+                                        name="{{m.id}}"
+                                    >
+                                        <option value="">{{m.visitTeamName}}</option>
+                                        <option
+                                            *ngFor="let t of teams | filterGroup:g.name | filterTournament:tournament.name"
+                                            value="{{t.teamId}}">{{t.teamName}}</option>
+                                    </select>
+
+                                    <img class="mr-4" src="{{m.visitFlag}}" width="30">
+                                    <!--//////////////////////////////////////////////////////-->
+
+                                    <!-- Select Match Status -->
+                                    <select
+                                        (change)="gameStatus($event.target, m)"
+                                        class="form-control form-control-sm mr-2"
+                                        name="{{m.id}}"
+                                    >
+                                        <div *ngIf="m.status==1; then done else toPlay"></div>
+
+                                        <ng-template #done>
+                                            <option value="0">Por Jugarse</option>
+                                            <option selected value="1">Terminado</option>
+                                        </ng-template>
+
+                                        <ng-template #toPlay>
+                                            <option selected value="0">Por Jugarse</option>
+                                            <option value="1">Terminado</option>
+                                        </ng-template>
+
+                                    </select>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

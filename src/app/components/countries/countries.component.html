@@ -1,0 +1,152 @@
+<div class="row">
+    <div class="col-4">
+        <div class="card">
+            <div class="card-header">
+                <h6>Nuevo Pais</h6>
+            </div>
+            <div class="card-body">
+                <form (ngSubmit)="add(flagUrl)">
+                    <div class="form-group">
+                        <label for="lbl-name">Nombre: </label>
+                        <input
+                            [(ngModel)]="newCountry.name"
+                            class="form-control"
+                            id="lbl-name"
+                            name="name"
+                            type="text"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="lbl-alias">Alias: </label>
+                        <input
+                            [(ngModel)]="newCountry.alias"
+                            class="form-control"
+                            id="lbl-alias"
+                            name="alias"
+                            type="text"
+                        >
+                        <small class="text-muted">Por favor escriba el alias en mayusculas.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="lbl-federation">Federación: </label>
+                        <select
+                            [(ngModel)]="newCountry.federation"
+                            class="form-control"
+                            id="lbl-federation"
+                            name="federation"
+                        >
+                            <option *ngFor="let f of federations" value="{{f.alias}}">{{f.alias}}</option>
+                        </select>
+                    </div>
+                    <div class="form-group text-center">
+                        <label for="lbl_flag">Seleccionar Bandera:</label>
+                        <input
+                            #flag
+                            (change)="onFlagSelected($event)"
+                            class="d-none"
+                            id="lbl_flag"
+                            type="file"
+                        >
+                        <div class="div d-block d-flex justify-content-center">
+                            <img
+                                (click)="flag.click()"
+                                [src]="flagSelected || '../../../assets/images/bandera.png'"
+                                alt="No-Image"
+                                width="120"
+                            >
+                        </div>
+                        <small class="text-muted">Las imagenes deben medir 128x128 pixeles y en formato .PNG</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="lbl-flagUrl">Bandera url: </label>
+                        <input
+                            #flagUrl
+                            class="form-control"
+                            disabled
+                            id="lbl-flagUrl"
+                            name="flagUrl"
+                            type="text"
+                            value="{{downloadURL | async}}"
+                        >
+                    </div>
+                    <button
+                        class="btn btn-primary btn-block"
+                        type="submit"
+                    >
+                        Guardar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-8">
+        <div class="card">
+            <div class="card-header">
+                <div style="display: inline-block; margin-right: 20px;">
+                    <h6>Filtrar paises por federación:</h6>
+                </div>
+                <div style="display: inline-block">
+                    <select (change)="onFilter($event.target)" class="form-control" style="width: 200px;">
+                        <option value="">Todos</option>
+                        <option *ngFor="let f of federations" value="{{f.alias}}">{{f.alias}}</option>
+                    </select>
+                </div>
+            </div>
+            <div *ngIf="countries?.length > 0;else none" class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-sm">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Pais</th>
+                            <th>Alias</th>
+                            <th>Federación</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let c of countries">
+                            <td>
+                                <button
+                                    (click)="delete($event, c)"
+                                    class="btn btn-danger btn-sm mr-2"
+                                    type="button"
+                                >
+                                    <svg class="bi bi-trash-fill" fill="currentColor" height="1.2em" viewBox="0 0 16 16"
+                                         width="1.2em" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"
+                                              fill-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                                <button
+                                    (click)="edit($event, c)"
+                                    class="btn btn-info btn-sm"
+                                    type="button"
+                                >
+                                    <svg class="bi bi-pencil-square" fill="currentColor" height="1.2em" viewBox="0 0 16 16"
+                                         width="1.2em" xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                        <path d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
+                                              fill-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                            </td>
+                            <td>
+                                <img alt="" class="img-fluid mr-2" src="{{c.flagUrl}}" width="36">
+                                {{c.name}}
+                            </td>
+                            <td>{{c.alias}}</td>
+                            <td>{{c.federation}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <ng-template #none>
+                <div class="card-body">
+                    <p>No se encontraron registros.</p>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>

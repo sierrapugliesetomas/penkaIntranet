@@ -1,0 +1,89 @@
+<div class="row">
+    <div class="col-4 offset-2">
+        <div class="card">
+            <div class="card-header">
+                <h6>Jugadores Seleccionables</h6>
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col">
+                        <label for="lbl-federation">Federación</label>
+                        <select
+                            id="lbl-federation"
+                            class="form-control"
+                            (change)="onFilterCountry($event.target)"
+                        >
+                            <option value="">Seleccionar</option>
+                            <option *ngFor="let f of federations" value="{{f.alias}}">{{f.alias}}</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label for="lbl-country">Pais:</label>
+                        <select
+                            id="lbl-country"
+                            class="form-control"
+                            [(ngModel)]="country.name"
+                            (change)="onFilterPlayer($event.target)"
+                        >
+                            <option *ngFor="let c of countries" value="{{c.name}}">{{c.name}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive mt-2">
+                    <table class="table table-bordered table-striped table-sm">
+                        <tr *ngFor="let p of players">
+                            <td>
+                                <img src="{{p.photoUrl}}" width="30" alt="">
+                                {{p.name}}
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="btn btn-success btn-sm" (click)="add($event, p)">
+                                    Seleccionar
+                                    <svg width="1.2em" height="1.2em" viewBox="0 0 16 16" class="bi bi-arrow-bar-right"
+                                         fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd"
+                                              d="M10.146 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L12.793 8l-2.647-2.646a.5.5 0 0 1 0-.708z"/>
+                                        <path fill-rule="evenodd"
+                                              d="M6 8a.5.5 0 0 1 .5-.5H13a.5.5 0 0 1 0 1H6.5A.5.5 0 0 1 6 8zm-2.5 6a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 1 0v11a.5.5 0 0 1-.5.5z"/>
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card">
+            <div class="card-header">
+                <h6>
+                    {{country.name}}
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive mt-2">
+                    <table class="table table-bordered table-striped table-sm">
+                        <tr *ngFor="let n of nationalteams | filterNationalteam:country.name let i = index">
+                            <td class="text-left">
+                                <button class="btn btn-danger btn-sm" (click)="delete($event, n)">
+                                    <svg width="1.2em" height="1.2em" viewBox="0 0 16 16" class="bi bi-arrow-bar-left"
+                                         fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd"
+                                              d="M5.854 4.646a.5.5 0 0 0-.708 0l-3 3a.5.5 0 0 0 0 .708l3 3a.5.5 0 0 0 .708-.708L3.207 8l2.647-2.646a.5.5 0 0 0 0-.708z"/>
+                                        <path fill-rule="evenodd"
+                                              d="M10 8a.5.5 0 0 0-.5-.5H3a.5.5 0 0 0 0 1h6.5A.5.5 0 0 0 10 8zm2.5 6a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 1 0v11a.5.5 0 0 1-.5.5z"/>
+                                    </svg>
+                                    retirar
+                                </button>
+                            </td>
+                            <td>
+                                <p>{{i + 1}}.  <img src="{{n.photoUrl}}" width="30" alt=""> {{n.player}}</p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

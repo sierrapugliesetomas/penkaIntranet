@@ -1,0 +1,31 @@
+export interface Tournament {
+    id?: string;
+    name?: string;
+    nTeams?: number;
+    nGroups?: number;
+    thirdPlace?: string;
+    firstPlace?: string;
+    phaseFinals?: string;
+    phaseGroups?: boolean;
+    typeMatches?: string;
+    nMatches?: number;
+    goalScorerId?: string;
+    goalScorerName?: string;
+    goalScorerFlagUrl?: string;
+    goalScorerCountry?: string;
+    mvpId?: string;
+    mvpName?: string;
+    mvpFlagUrls?: string;
+    mvpCountry?: string;
+    podiumFirstPlaceId?: string;
+    podiumFirstPlaceName?: string;
+    podiumFirstPlaceFlagUrl?: string;
+    podiumSecondPlaceId?: string;
+    podiumSecondPlaceName?: string;
+    podiumSecondPlaceFlagUrl?: string;
+    podiumThirdPlaceId?: string;
+    podiumThirdPlaceName?: string;
+    podiumThirdPlaceFlagUrl?: string;
+    openingDate?: string;
+    closureDate?: string;
+}

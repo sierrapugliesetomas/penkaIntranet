@@ -1,0 +1,58 @@
+<div class="row">
+    <div class="col-4 offset-4">
+        <div class="card">
+            <div class="card-header">
+                <h6>Editar Club</h6>
+            </div>
+            <div class="card-body">
+                <form (ngSubmit)="update()">
+                    <div class="form-group">
+                        <label for="lbl-name">Nombre:</label>
+                        <input
+                            [(ngModel)]="club.name"
+                            class="form-control"
+                            id="lbl-name"
+                            name="name"
+                            type="text"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="lbl-alias">Alias:</label>
+                        <input
+                            [(ngModel)]="club.alias"
+                            class="form-control"
+                            id="lbl-alias"
+                            name="alias"
+                            type="text"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="lbl-league">Liga:</label>
+                        <select
+                            [(ngModel)]="club.league"
+                            class="form-control"
+                            id="lbl-league"
+                            name="league"
+                        >
+                            <option selected value="{{club.league}}">{{club.league}}</option>
+                            <option *ngFor="let l of leagues" value="{{l.name}}">{{l.name}}</option>
+                        </select>
+                    </div>
+                    <button
+                        class="btn btn-primary btn-block"
+                        type="submit"
+                    >
+                        Actualizar
+                    </button>
+                    <button
+                        (click)="back()"
+                        class="btn btn-outline-info btn-block"
+                        type="button"
+                    >
+                        Cancelar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

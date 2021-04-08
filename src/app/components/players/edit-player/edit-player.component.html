@@ -1,0 +1,111 @@
+<div class="row">
+    <div class="col-4 offset-4">
+        <div class="card">
+            <div class="card-header">
+                <h6>Editar Jugador</h6>
+            </div>
+            <div class="card-body">
+                <form (ngSubmit)="update()">
+                    <div class="form-group">
+                        <label for="lbl-name">Nombre:</label>
+                        <input
+                            [(ngModel)]="player.name"
+                            class="form-control"
+                            id="lbl-name"
+                            name="name"
+                            type="text"
+                        >
+                    </div>
+                    <div class="form-group form-check">
+                        <input
+                            [(ngModel)]="player.active"
+                            class="form-check-input"
+                            id="lbl_active"
+                            name="active"
+                            type="checkbox"
+                            value="{{player.active}}"
+                        >
+                        <label class="form-check-label" for="lbl_active">En activo</label>
+                    </div>
+                    <div class="form-row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="lbl-federation">Federación:</label>
+                                <select
+                                    (change)="filterCountry($event.target)"
+                                    class="form-control"
+                                    id="lbl-federation"
+                                    name="federation"
+                                >
+                                    <option value="">Seleccionar</option>
+                                    <option *ngFor="let f of federations"
+                                            value="{{f.alias}}">{{f.alias}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="lbl-country">Pais:</label>
+                                <select
+                                    [(ngModel)]="player.country"
+                                    class="form-control"
+                                    id="lbl-country"
+                                    name="country"
+                                >
+                                    <option value="{{player.country}}">{{player.country}}</option>
+                                    <option *ngFor="let c of countries"
+                                            value="{{c.name}}">{{c.name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="lbl-league">Liga:</label>
+                                <select
+                                    (change)="filterClub($event.target)"
+                                    class="form-control"
+                                    id="lbl-league"
+                                    name="league"
+                                >
+                                    <option value="">Seleccionar</option>
+                                    <option *ngFor="let l of leagues"
+                                            value="{{l.name}}">{{l.name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="lbl-club">Club:</label>
+                                <select
+                                    [(ngModel)]="player.club"
+                                    class="form-control"
+                                    id="lbl-club"
+                                    name="club"
+                                >
+                                    <option value="{{player.club}}">{{player.club}}</option>
+                                    <option *ngFor="let c of clubs"
+                                            value="{{c.name}}">{{c.name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        class="btn btn-primary btn-block"
+                        type="submit"
+                    >
+                        Guardar
+                    </button>
+                    <button
+                        (click)="back()"
+                        class="btn btn-outline-info btn-block"
+                        type="button"
+                    >
+                        Cancelar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,120 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" routerLink="">Penka - Intranet</a>
+        <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+                data-target="#navbarSupportedContent" data-toggle="collapse" type="button">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
+                       id="navbarDropdown" role="button">
+                        Templates
+                    </a>
+                    <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                        <a class="dropdown-item" routerLink="templates/new">Nuevo</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="templates">Listado</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="templates/history">Historico</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
+                       id="navbarDropdown" role="button">
+                        Partidos Sueltos
+                    </a>
+                    <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                        <a class="dropdown-item" routerLink="singleMatches/new">Nuevo</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="singleMatches">Listado</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
+                       id="navbarDropdown" role="button">
+                        Torneos
+                    </a>
+                    <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                        <a class="dropdown-item" routerLink="tournaments/new">Nuevo Torneo</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="tournaments">Listado de Torneos</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
+                       id="navbarDropdown" role="button">
+                        Ligas
+                    </a>
+                    <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                        <a class="dropdown-item" routerLink="leagues/new">Nueva Liga</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="leagues/list">Listado de Ligas</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
+                       id="navbarDropdown" role="button">
+                        Penka
+                    </a>
+                    <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                        <a class="dropdown-item" routerLink="format">Formato</a>
+                        <div class="dropdown-divider"></div>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
+                       id="navbarDropdown" role="button">
+                        Futbol
+                    </a>
+                    <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                        <a class="dropdown-item" routerLink="players">Jugadores</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="clubs">Clubes</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="leagues">Ligas</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="nationalteams">Selecciones</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="countries">Paises</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="federations">Federaciones</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="competitions">Competiciones</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
+                       id="navbarDropdown" role="button">
+                        Miscelaneos
+                    </a>
+                    <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                        <a class="dropdown-item" routerLink="typeTournaments">Tipo de Torneo</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="typeMatches">Tipo de Partido</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="thirdPlace">Partido 3er lugar</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" routerLink="firstPlace">Partido Final</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <div *ngIf="auth.user$ | async; then authenticated"></div>
+                    <ng-template #authenticated>
+                        <div *ngIf="auth.user$ | async as user">
+                            <img [src]="user.photoURL" class="img-fluid" width="30">
+                            <button
+                                (click)="auth.signOut()"
+                                class="btn btn-dark"
+                                type="button"
+                            >
+                                Cerrar Sesion
+                            </button>
+                        </div>
+                    </ng-template>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

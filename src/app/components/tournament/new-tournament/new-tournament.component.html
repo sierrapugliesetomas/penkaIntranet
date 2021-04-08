@@ -1,0 +1,189 @@
+<div class="row">
+    <div class="col-6 offset-3">
+        <div class="card">
+            <div class="card-header">
+                <h6>Nuevo Torneo</h6>
+            </div>
+            <div class="card-body">
+                <form (ngSubmit)="addNewTournament()">
+
+                    <!-- TOURNAMENT NAME-->
+                    <div class="form-group row">
+                        <label for="lbl-name" class="col-4 col-form-label">Nombre del Torneo:</label>
+                        <div class="col-8">
+                            <input
+                                type="text"
+                                name="name"
+                                id="lbl-name"
+                                class="form-control"
+                                [(ngModel)]="newTournament.name"
+                                (change)="preventDuplicated($event.target)"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- TYPE TOURNAMENT -->
+                    <div class="form-group row">
+                        <label for="lbl-typeTournament" class="col-4 col-form-label">Tipo de Torneo:</label>
+                        <div class="col-8">
+                            <select
+                                class="form-control"
+                                name="typeTournament"
+                                id="lbl-typeTournament"
+                                [(ngModel)]="newTournament.phaseFinals"
+                                (change)="loadTypeTournament($event.target)"
+                            >
+                                <option *ngFor="let tt of typeTournaments" value="{{tt.id}}">{{tt.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- TYPE MATCH -->
+                    <div class="form-group row">
+                        <label for="lbl-typeMatches" class="col-4 col-form-label">Tipo de Partidos:</label>
+                        <div class="col-8">
+                            <select
+                                class="form-control"
+                                name="typeMatches"
+                                id="lbl-typeMatches"
+                                [(ngModel)]="newTournament.typeMatches"
+                                (change)="loadTypeMatches($event.target)"
+                            >
+                                <option *ngFor="let tm of typeMatches" value="{{tm.id}}">{{tm.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- THIRD PLACE -->
+                    <div class="form-group row">
+                        <label for="lbl-thirdplace" class="col-4 col-form-label">Partido 3er lugar:</label>
+                        <div class="col-8">
+                            <select
+                                class="form-control"
+                                name="thirdPlace"
+                                id="lbl-thirdplace"
+                                [(ngModel)]="newTournament.thirdPlace"
+                                (change)="loadThirdPlace($event.target)"
+                            >
+                                <option *ngFor="let tp of thirdPlaces" value="{{tp.id}}">{{tp.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- MATCH FINAL -->
+                    <div class="form-group row">
+                        <label for="lbl-firstplace" class="col-4 col-form-label">Partido Final:</label>
+                        <div class="col-8">
+                            <select
+                                class="form-control"
+                                name="firstPlace"
+                                id="lbl-firstplace"
+                                [(ngModel)]="newTournament.firstPlace"
+                                (change)="loadFirstPlace($event.target)"
+                            >
+                                <option *ngFor="let fp of firstPlaces" value="{{fp.id}}">{{fp.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- SETTING GROUPS -->
+                    <div *ngIf="typeTournament.groups === true; then groups else nogroups"></div>
+
+                    <ng-template #groups>
+                        <div class="form-row">
+                            <div class="col">
+                                <!-- NUMBER TEAMS -->
+                                <div class="form-group row">
+                                    <label for="lbl-nteams" class="col-7 col-form-label">Nº de Equipos:</label>
+                                    <div class="col-5">
+                                        <input
+                                            type="number"
+                                            class="form-control"
+                                            name="nTeams"
+                                            id="lbl-nteams"
+                                            [(ngModel)]="newTournament.nTeams"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <!-- NUMBER GROUPS -->
+                                <div class="form-group row">
+                                    <label for="lbl-ngroups" class="col-7 col-form-label">Nº de Grupos:</label>
+                                    <div class="col-5">
+                                        <input
+                                            type="number"
+                                            class="form-control"
+                                            name="nGroups"
+                                            id="lbl-ngroups"
+                                            [(ngModel)]="newTournament.nGroups"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-template>
+
+                    <ng-template #nogroups></ng-template>
+
+                    <!-- DATE TIME PICKER OPENING -->
+                    <div class="form-group row">
+                        <label for="lbl-opening" class="col-4 col-form-label">Fecha Inaguracion:</label>
+                        <div class="col-8">
+                            <div class=" input-group mr-2">
+                                <input
+                                    class="form-control"
+                                    id="lbl-opening"
+                                    name="opening"
+                                    ngbDatepicker #opening="ngbDatepicker"
+                                    (dateSelect)="updateOpening($event)"
+                                >
+                                <div class="input-group-append">
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-secondary calendar"
+                                        (click)="opening.toggle()"
+                                    >
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DATE TIME PICKER CLOSURE -->
+                    <div class="form-group row">
+                        <label for="lbl-closure" class="col-4 col-form-label">Fecha Clausura:</label>
+                        <div class="col-8">
+                            <div class=" input-group mr-2">
+                                <input
+                                    class="form-control"
+                                    id="lbl-closure"
+                                    name="closure"
+                                    ngbDatepicker #closure="ngbDatepicker"
+                                    (dateSelect)="updateClosure($event)"
+                                >
+                                <div class="input-group-append">
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-secondary calendar"
+                                        (click)="closure.toggle()"
+                                    >
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBMIT -->
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-block"
+                    >
+                        Guardar
+                    </button>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

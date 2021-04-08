@@ -1,0 +1,47 @@
+<div class="row">
+    <div class="col-4 offset-4">
+        <div class="card">
+            <div class="card-header">
+                <h6>Editar Federación</h6>
+            </div>
+            <div class="card-body">
+                <form (ngSubmit)="update()">
+                    <div class="form-group">
+                        <label for="lbl-name">Nombre: </label>
+                        <input
+                            type="text"
+                            id="lbl-name"
+                            name="name"
+                            class="form-control"
+                            [(ngModel)]="federation.name"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="lbl-alias">Alias: </label>
+                        <input
+                            type="text"
+                            id="lbl-alias"
+                            name="alias"
+                            class="form-control"
+                            [(ngModel)]="federation.alias"
+                        >
+                        <small><p>El alias escribelo en mayúsculas por favor.</p></small>
+                    </div>
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-block"
+                    >
+                        Actualizar
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-outline-info btn-block"
+                        (click)="back()"
+                    >
+                        Cancelar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

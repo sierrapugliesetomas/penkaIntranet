@@ -1,0 +1,283 @@
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <h5 class="mb-2">{{match.tournamentName}}</h5>
+        </nav>
+    </div>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header form-inline">
+                <h1 class="mr-4">{{match.homeTeamName}}</h1>
+                <img class="ml-4 mr-4" src="{{match.homeFlag}}" width="80">
+                <select
+                    class="form-control mr-4 font-weight-bold"
+                    name="{{match.id}}"
+                >
+                    <option value="{{match.homeScore}}">{{match.homeScore}}</option>
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                </select>
+                <h5 class="ml-4 mr-4">Vs</h5>
+                <select
+                    class="form-control ml-4 mr-4 font-weight-bold"
+                    name="{{match.id}}"
+                >
+                    <option value="{{match.visitScore}}">{{match.visitScore}}</option>
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                </select>
+                <img class="ml-4 mr-4" src="{{match.visitFlag}}" width="80">
+                <h1 class="ml-4 mr-4">{{match.visitTeamName}}</h1>
+                <!--<select
+                    name="{{match.id}}"
+                    class="form-control font-weight-bold ml-4  mr-2"
+                    (change)="gameStatus($event.target, match.id)"
+                >
+                    <div *ngIf="match.status==1; then terminado else porjugar"></div>
+                    <ng-template #terminado>
+                        <option value="0">Por Jugarse</option>
+                        <option value="1" selected>Terminado</option>
+                    </ng-template>
+                    <ng-template #porjugar>
+                        <option value="0" selected>Por Jugarse</option>
+                        <option value="1">Terminado</option>
+                    </ng-template>
+                </select>-->
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="form-inline">
+                            <div>Mejor Jugador del Partido:</div>
+                            <div *ngFor="let mvp of matchesLineUp | filterMatch:match.id | filterMvp: true">
+                                {{mvp.playerName}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <h5>Titulares</h5>
+                        <ul *ngFor="let p of players | filterCountry:match.homeTeamName | filterSelectable:true"
+                            class="list-group">
+                            <li class="list-group-item border-0">
+                                <div class="form-inline">
+                                    <div class="mr-4">
+                                        {{p.name}}
+                                    </div>
+                                    <img class="mr-2" src="assets/images/ball.png" width="15">
+                                    <select
+                                        (change)="goal($event.target, p, match)"
+                                        class="form-control form-control-sm mr-2"
+                                    >
+                                        <option
+                                            *ngFor="let mlp of matchesLineUp | filterMatch:match.id | filterPlayer:p.id"
+                                            value="{{mlp.goals}}">{{mlp.goals}}</option>
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                    </select>
+                                    <img class="mr-2" src="assets/images/yellowCard.png" width="20">
+                                    <select class="form-control form-control-sm mr-2">
+                                        <option selected value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                    </select>
+                                    <img class="mr-2" src="assets/images/redCard.png" width="20">
+                                    <select class="form-control form-control-sm mr-2">
+                                        <option selected value="0">0</option>
+                                        <option value="1">1</option>
+                                    </select>
+                                    <div class="form-group form-check ml-2">
+                                        <input
+                                            (change)="mvp($event.target, p)"
+                                            class="form-check-input"
+                                            id="lbl-goalscorer"
+                                            type="checkbox"
+                                        >
+                                        <label class="form-check-label" for="lbl-goalscorer">MVP</label>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                        <h5>Suplentes</h5>
+                        <ul *ngFor="let p of players | filterCountry:match.homeTeamName | filterSelectable:true"
+                            class="list-group">
+                            <li class="list-group-item border-0">
+                                <div class="form-inline">
+                                    <div class="mr-4">
+                                        {{p.name}}
+                                    </div>
+                                    <img class="mr-2" src="assets/images/ball.png" width="15">
+                                    <select
+                                        (change)="goal($event.target, p, match)"
+                                        class="form-control form-control-sm mr-2"
+                                    >
+                                        <option
+                                            *ngFor="let mlp of matchesLineUp | filterMatch:match.id | filterPlayer:p.id"
+                                            value="{{mlp.goals}}">{{mlp.goals}}</option>
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                    </select>
+                                    <img class="mr-2" src="assets/images/yellowCard.png" width="20">
+                                    <select class="form-control form-control-sm mr-2">
+                                        <option selected value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                    </select>
+                                    <img class="mr-2" src="assets/images/redCard.png" width="20">
+                                    <select class="form-control form-control-sm mr-2">
+                                        <option selected value="0">0</option>
+                                        <option value="1">1</option>
+                                    </select>
+                                    <div class="form-group form-check ml-2">
+                                        <input
+                                            (change)="mvp($event.target, p)"
+                                            class="form-check-input"
+                                            id="lbl-goalscorer"
+                                            type="checkbox"
+                                        >
+                                        <label class="form-check-label" for="lbl-goalscorer">MVP</label>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-6">
+                        <h5>Titulares</h5>
+                        <ul *ngFor="let p of players | filterCountry:match.visitTeamName | filterSelectable:true"
+                            class="list-group">
+                            <li class="list-group-item border-0">
+                                <div class="form-inline">
+                                    <div class="mr-4">
+                                        {{p.name}}
+                                    </div>
+                                    <img class="mr-2" src="assets/images/ball.png" width="15">
+                                    <select
+                                        (change)="goal($event.target, p, match)"
+                                        class="form-control form-control-sm mr-2"
+                                    >
+                                        <option
+                                            *ngFor="let mlp of matchesLineUp | filterMatch:match.id | filterPlayer:p.id"
+                                            value="{{mlp.goals}}">{{mlp.goals}}</option>
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                    </select>
+                                    <img class="mr-2" src="assets/images/yellowCard.png" width="20">
+                                    <select class="form-control form-control-sm mr-2">
+                                        <option selected value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                    </select>
+                                    <img class="mr-2" src="assets/images/redCard.png" width="20">
+                                    <select class="form-control form-control-sm mr-2">
+                                        <option selected value="0">0</option>
+                                        <option value="1">1</option>
+                                    </select>
+                                    <div class="form-group form-check ml-2">
+                                        <input
+                                            (change)="mvp($event.target, p)"
+                                            class="form-check-input"
+                                            id="lbl-goalscorer"
+                                            type="checkbox"
+                                        >
+                                        <label class="form-check-label" for="lbl-goalscorer">MVP</label>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                        <h5>Suplentes</h5>
+                        <ul *ngFor="let p of players | filterCountry:match.visitTeamName | filterSelectable:true"
+                            class="list-group">
+                            <li class="list-group-item border-0">
+                                <div class="form-inline">
+                                    <div class="mr-4">
+                                        {{p.name}}
+                                    </div>
+                                    <img class="mr-2" src="assets/images/ball.png" width="15">
+                                    <select
+                                        (change)="goal($event.target, p, match)"
+                                        class="form-control form-control-sm mr-2"
+                                    >
+                                        <option
+                                            *ngFor="let mlp of matchesLineUp | filterMatch:match.id | filterPlayer:p.id"
+                                            value="{{mlp.goals}}">{{mlp.goals}}</option>
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                    </select>
+                                    <img class="mr-2" src="assets/images/yellowCard.png" width="20">
+                                    <select class="form-control form-control-sm mr-2">
+                                        <option selected value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                    </select>
+                                    <img class="mr-2" src="assets/images/redCard.png" width="20">
+                                    <select class="form-control form-control-sm mr-2">
+                                        <option selected value="0">0</option>
+                                        <option value="1">1</option>
+                                    </select>
+                                    <div class="form-group form-check ml-2">
+                                        <input
+                                            (change)="mvp($event.target, p)"
+                                            class="form-check-input"
+                                            id="lbl-goalscorer"
+                                            type="checkbox"
+                                        >
+                                        <label class="form-check-label" for="lbl-goalscorer">MVP</label>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

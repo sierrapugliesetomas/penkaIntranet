@@ -1,0 +1,77 @@
+<div class="row">
+    <div class="col-12">
+        <div *ngFor="let g of groups | filterTournament:tournament.name" class="card mb-4">
+            <div class="card-header form-inline pt-2 pb-2">
+                <div class="col-6">
+                    <h6>{{g.name}}</h6>
+                </div>
+                <div class="col-6 form-inline">
+                    <div class="font-weight-bold m-auto">PJ</div>
+                    <div class="font-weight-bold m-auto">G</div>
+                    <div class="font-weight-bold m-auto">E</div>
+                    <div class="font-weight-bold m-auto">P</div>
+                    <div class="font-weight-bold m-auto">GF</div>
+                    <div class="font-weight-bold m-auto">GC</div>
+                    <div class="font-weight-bold m-auto">+/-</div>
+                    <div class="font-weight-bold m-auto">PTS</div>
+                    <div class="font-weight-bold m-auto">Clasificado</div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <ul *ngFor="let r of results | filterGroup:g.name | filterTournament:tournament.name"
+                    class="list-group">
+                    <li class="list-group-item d-flex justify-content-center pt-1 pb-1">
+                        <div class="col-6 form-inline">
+                            <div>
+                                <button (click)="updateResults(r.id, r.teamId, g.name, tournamentId)" class="btn btn-outline-success btn-sm mr-4"
+                                        type="button">
+                                    Actualizar
+                                </button>
+                            </div>
+                            <img alt="" class="mr-2" src="{{r.teamFlagUrl}}" width="40">
+                            <div><h5>{{r.teamName}}</h5></div>
+                        </div>
+                        <div class="col-6">
+                            <ul *ngFor="let r of results | filterTeam:r.teamName | filterGroup:g.name | filterTournament:tournament.name"
+                                class="list-group list-group-horizontal">
+                                <li class="list-group-item border-0">{{r.matchesPlayed}}</li>
+                                <li class="list-group-item border-0">{{r.matchesWon}}</li>
+                                <li class="list-group-item border-0">{{r.matchesDraw}}</li>
+                                <li class="list-group-item border-0">{{r.matchesLost}}</li>
+                                <li class="list-group-item border-0">{{r.positiveGoals}}</li>
+                                <li class="list-group-item border-0">{{r.negativeGoals}}</li>
+                                <li class="list-group-item border-0">{{r.averageGoals}}</li>
+                                <li class="list-group-item border-0">{{r.points}}</li>
+                                <li class="list-group-item border-0">
+
+                                    <div *ngIf="r.classified===true;then classified else none"></div>
+
+                                    <ng-template #classified>
+                                        <select
+                                            (change)="classifiedTeam($event.target, r.id)"
+                                            class="form-control form-control-sm"
+                                        >
+                                            <option value="0">No</option>
+                                            <option selected value="1">Si</option>
+                                        </select>
+                                    </ng-template>
+
+                                    <ng-template #none>
+                                        <select
+                                            (change)="classifiedTeam($event.target, r.id)"
+                                            class="form-control form-control-sm"
+                                        >
+                                            <option selected value="0">No</option>
+                                            <option value="1">Si</option>
+                                        </select>
+                                    </ng-template>
+
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

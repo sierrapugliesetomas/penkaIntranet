@@ -1,0 +1,339 @@
+<div class="row">
+    <div class="col-6 offset-3">
+        <div class="card">
+            <div class="card-header">
+                <h6>Nuevo Partido</h6>
+            </div>
+            <div class="card-body">
+                <form (ngSubmit)="add()">
+                    <!-- TYPE MATCH -->
+                    <div class="form-row">
+                        <div class="col">
+                            <label for="lbl-competition">Competicion:</label>
+                        </div>
+                        <div class="col">
+                            <select
+                                name="competition"
+                                id="lbl-competition"
+                                class="form-control"
+                                [(ngModel)]="newSingleMatch.competition"
+                            >
+                                <option *ngFor="let comp of competitions" value="{{comp.name}}">{{comp.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <hr>
+                    <!-- DATE TIME -->
+                    <div class="form-row">
+                        <div class="col">
+                            <p>Fecha/Hora del partido:</p>
+                        </div>
+                        <div class="col">
+                            <div class="input-group mr-2">
+                                <input
+                                    class="form-control"
+                                    name="startDate"
+                                    [minDate]="minDate"
+                                    ngbDatepicker #d="ngbDatepicker"
+                                    (dateSelect)="updateDateMatch($event)"
+                                >
+                                <div class="input-group-append">
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-secondary calendar"
+                                        (click)="d.toggle()"
+                                    >
+                                    </button>
+                                </div>
+                                <input
+                                    type="time"
+                                    class="form-control"
+                                    name="startTime"
+                                    value="{{matchTime}}"
+                                    (change)="updateTimeMatch($event.target)"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <!-- LIMIT DATE AND TIME -->
+                    <div class="form-row">
+                        <div class="col">
+                            <p>Fecha/Hora Limite:</p>
+                        </div>
+                        <div class="col">
+                            <div class="input-group mr-2">
+                                <input
+                                    class="form-control"
+                                    name="limitDate"
+                                    [minDate]="minDate"
+                                    ngbDatepicker #c="ngbDatepicker"
+                                    (dateSelect)="updateDateLimit($event)"
+                                >
+                                <div class="input-group-append">
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-secondary calendar"
+                                        (click)="c.toggle()"
+                                    >
+                                    </button>
+                                </div>
+                                <input
+                                    type="time"
+                                    class="form-control"
+                                    name="limitTime"
+                                    value="{{matchTimeLimit}}"
+                                    (change)="updateTimeLimit($event.target)"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+
+                    <!-- PICK TYPE TEAM -->
+                    <div class="form-row">
+                        <div class="col">
+                            <div class="form-group form-inline">
+                                <label for="lbl-typeTeam" class="mr-4">Tipo de Equipo:</label>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <select
+                                name="typeTeam"
+                                [(ngModel)]="newSingleMatch.typeTeam"
+                                id="lbl-typeTeam"
+                                class="form-control"
+                                (change)="typeTeam($event.target)"
+                            >
+                                <option value=""></option>
+                                <option value="1">SELECCION</option>
+                                <option value="2">CLUB</option>
+                            </select>
+                        </div>
+                    </div>
+                    <hr>
+                    <!-- PICK NATIONAL TEAMS -->
+                    <div *ngIf="newSingleMatch.typeTeam === '1'; then national else none"></div>
+                    <ng-template #national>
+                        <br>
+                        <!-- EQUIPO LOCAL-->
+                        <div class="form-row">
+                            <div class="col">
+                                <h5>Equipo Local</h5>
+                            </div>
+                        </div>
+                        <hr>
+                        <!-- FEDERATION -->
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="lbl-federation" class="mr-4">Federacion:</label>
+                            </div>
+                            <div class="col">
+                                <select
+                                    id="lbl-federation"
+                                    class="form-control"
+                                    (change)="filterCountry($event.target)"
+                                >
+                                    <option value="">Seleccionar</option>
+                                    <option *ngFor="let f of federations" value="{{f.alias}}">{{f.alias}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-row">
+                            <div class="col">
+                                <select
+                                    class="form-control"
+                                    (change)="homeTeamNational($event.target)"
+                                >
+                                    <option value="">Seleccionar</option>
+                                    <option *ngFor="let c of countries" value="{{c.id}}">{{c.name}}</option>
+                                </select>
+
+                            </div>
+                            <div class="col">
+                                <input
+                                    class="form-control"
+                                    type="text"
+                                    value="{{newSingleMatch.homeTeamName}}"
+                                    disabled
+                                >
+                            </div>
+                            <div class="col">
+                                <img src="{{newSingleMatch.homeTeamFlag}}" alt="" width="40" class="ml-4">
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="text-center font-weight-bold">Vs</div>
+                        <br>
+                        <!-- EQUIPO VISITANTE -->
+                        <div class="form-row">
+                            <div class="col">
+                                <h5>Equipo Visitante</h5>
+                            </div>
+                        </div>
+                        <hr>
+                        <!-- FEDERATION -->
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="lbl-federation2" class="mr-4">Federacion:</label>
+                            </div>
+                            <div class="col">
+                                <select
+                                    id="lbl-federation2"
+                                    class="form-control"
+                                    (change)="filterCountry($event.target)"
+                                >
+                                    <option value="">Seleccionar</option>
+                                    <option *ngFor="let f of federations" value="{{f.alias}}">{{f.alias}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-row">
+                            <div class="col">
+                                <select
+                                    id="lbl-visitNational"
+                                    class="form-control"
+                                    (change)="visitTeamNational($event.target)"
+                                >
+                                    <option value="">Seleccionar</option>
+                                    <option *ngFor="let c of countries" value="{{c.id}}">{{c.name}}</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <input
+                                    id="lbl-visitTeamName"
+                                    class="form-control"
+                                    type="text"
+                                    value="{{newSingleMatch.visitTeamName}}"
+                                    disabled
+                                >
+                            </div>
+                            <div class="col">
+                                <img src="{{newSingleMatch.visitTeamFlag}}" alt="" width="40" class="ml-4">
+                            </div>
+                        </div>
+                    </ng-template>
+                    <ng-template #none></ng-template>
+
+                    <!-- PICK CLUB TEAMS -->
+                    <div *ngIf="newSingleMatch.typeTeam === '2'; then club else none"></div>
+                    <ng-template #club>
+                        <br>
+                        <!-- EQUIPO LOCAL-->
+                        <div class="form-row">
+                            <div class="col">
+                                <h5>Equipo Local</h5>
+                            </div>
+                        </div>
+                        <hr>
+                        <!-- LEAGUE -->
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="lbl-club" class="mr-4">Liga:</label>
+                            </div>
+                            <div class="col">
+                                <select
+                                    id="lbl-club"
+                                    class="form-control"
+                                    (change)="filterClub($event.target)"
+                                >
+                                    <option value="">Seleccionar</option>
+                                    <option *ngFor="let l of leagues" value="{{l.name}}">{{l.name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <hr>
+                        <!--TEAM 1-->
+                        <div class="form-row">
+                            <div class="col">
+                                <select
+                                    id="lbl-homeClub"
+                                    class="form-control"
+                                    (change)="homeTeamClub($event.target)"
+                                >
+                                    <option value="">Seleccionar</option>
+                                    <option *ngFor="let c of clubs" value="{{c.id}}">{{c.name}}</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <input
+                                    class="form-control"
+                                    type="text"
+                                    value="{{newSingleMatch.homeTeamName}}"
+                                    disabled
+                                >
+                            </div>
+                            <div class="col">
+                                <img src="{{newSingleMatch.homeTeamFlag}}" alt="" width="40" class="ml-4">
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="text-center font-weight-bold">Vs</div>
+                        <br>
+                        <!-- EQUIPO VISITANTE -->
+                        <div class="form-row">
+                            <div class="col">
+                                <h5>Equipo Visitante</h5>
+                            </div>
+                        </div>
+                        <hr>
+                        <!-- LEAGUE -->
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="lbl-club2" class="mr-4">Liga:</label>
+                            </div>
+                            <div class="col">
+                                <select
+                                    id="lbl-club2"
+                                    class="form-control"
+                                    (change)="filterClub($event.target)"
+                                >
+                                    <option value="">Seleccionar</option>
+                                    <option *ngFor="let l of leagues" value="{{l.name}}">{{l.name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <hr>
+                        <!--TEAM 2-->
+                        <div class="form-row">
+                            <div class="col">
+                                <select
+                                    id="lbl-visitClub"
+                                    class="form-control"
+                                    (change)="visitTeamClub($event.target)"
+                                >
+                                    <option value="">Seleccionar</option>
+                                    <option *ngFor="let c of clubs" value="{{c.id}}">{{c.name}}</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <input
+                                    class="form-control"
+                                    type="text"
+                                    value="{{newSingleMatch.visitTeamName}}"
+                                    disabled
+                                >
+                            </div>
+                            <div class="col">
+                                <img src="{{newSingleMatch.visitTeamFlag}}" alt="" width="40" class="ml-4">
+                            </div>
+                        </div>
+                    </ng-template>
+                    <ng-template #none></ng-template>
+                    <hr>
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Guardar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+
+    </div>
+</div>

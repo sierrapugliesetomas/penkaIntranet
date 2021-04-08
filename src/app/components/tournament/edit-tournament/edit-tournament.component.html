@@ -1,0 +1,56 @@
+<div class="row">
+    <div class="col-12">
+        <div class="breadcrumb p-2">
+            <h5>{{tournament.name}}</h5>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
+            <li [ngbNavItem]="1">
+                <a ngbNavLink>Equipos - Grupos</a>
+                <ng-template ngbNavContent>
+                    <app-teams [tournamentId]="tournamentId" [tournament]="tournament">
+                    </app-teams>
+                </ng-template>
+            </li>
+            <li [ngbNavItem]="2">
+                <a ngbNavLink>Fase Grupos</a>
+                <ng-template ngbNavContent>
+                    <app-matches [tournamentId]="tournamentId" [tournament]="tournament">
+                    </app-matches>
+                </ng-template>
+            </li>
+            <li [ngbNavItem]="3">
+                <a ngbNavLink>Resultados Grupos</a>
+                <ng-template ngbNavContent>
+                    <app-results [tournamentId]="tournamentId" [tournament]="tournament">
+                    </app-results>
+                </ng-template>
+            </li>
+            <li [ngbNavItem]="4">
+                <a ngbNavLink>Fase Eliminatoria</a>
+                <ng-template ngbNavContent>
+                    <app-matches-finals [tournamentId]="tournamentId" [tournament]="tournament">
+                    </app-matches-finals>
+                </ng-template>
+            </li>
+            <li [ngbNavItem]="5">
+                <a ngbNavLink>Resultados PENKA</a>
+                <ng-template ngbNavContent>
+                    <app-finals [tournamentId]="tournamentId" [tournament]="tournament">
+                    </app-finals>
+                </ng-template>
+            </li>
+            <li [ngbNavItem]="6">
+                <a ngbNavLink>Estadisticas</a>
+                <ng-template ngbNavContent>
+                    <app-penka [tournamentId]="tournamentId" [tournament]="tournament">
+                    </app-penka>
+                </ng-template>
+            </li>
+        </ul>
+        <div [ngbNavOutlet]="nav" class="mt-2"></div>
+    </div>
+</div>

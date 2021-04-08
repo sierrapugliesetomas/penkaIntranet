@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "penka-a1622": {
+      "hosting": {
+        "penkadist": [
+          "penka-a1622"
+        ]
+      }
+    }
+  }
+}

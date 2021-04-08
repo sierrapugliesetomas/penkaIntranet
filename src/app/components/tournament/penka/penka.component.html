@@ -1,0 +1,89 @@
+<div *ngIf="state==true; then show else none"></div>
+<ng-template #show>
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6>Podio</h6>
+                </div>
+                <div class="card-body">
+                    <ul *ngFor="let r of results | filterPodium:'firstPlace'" class="list-group list-group-horizontal">
+                        <li class="list-group-item border-0 p-2">
+                            <img src="../../../../assets/images/gold-cup.png" width="30">
+                        </li>
+                        <li class="list-group-item border-0 p-2">
+                            <img src="{{r.teamFlagUrl}}" width="30">
+                        </li>
+                        <li class="list-group-item border-0 p-2">
+                            <h5>{{r.teamName}}</h5>
+                        </li>
+                    </ul>
+                    <ul *ngFor="let r of results | filterPodium:'secondPlace'" class="list-group list-group-horizontal">
+                        <li class="list-group-item border-0 p-2">
+                            <img src="../../../../assets/images/silver-cup.png" width="30">
+                        </li>
+                        <li class="list-group-item border-0 p-2">
+                            <img src="{{r.teamFlagUrl}}" width="30">
+                        </li>
+                        <li class="list-group-item border-0 p-2">
+                            <h5>{{r.teamName}}</h5>
+                        </li>
+                    </ul>
+                    <ul *ngFor="let r of results | filterPodium:'thirdPlace'" class="list-group list-group-horizontal">
+                        <li class="list-group-item border-0 p-2">
+                            <img src="../../../../assets/images/bronze-cup.png" width="30">
+                        </li>
+                        <li class="list-group-item border-0 p-2">
+                            <img src="{{r.teamFlagUrl}}" width="30">
+                        </li>
+                        <li class="list-group-item border-0 p-2">
+                            <h5>{{r.teamName}}</h5>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6>Goleador</h6>
+                </div>
+                <div class="card-body">
+                    <label for="lbl-goalScorer">Buscar al Jugador:</label>
+                    <input
+                        [(ngModel)]="goalScorer"
+                        class="form-control"
+                        id="lbl-goalScorer"
+                        name="goalScorer"
+                        type="text"
+                    >
+                    <hr>
+                    <ul *ngFor="let p of players | filterGoalScorer: goalScorer"
+                        class="list-group list-group-horizontal">
+                        <li class="list-group-item border-0">
+                            <img src="{{p.photoUrl}}" width="30">
+                        </li>
+                        <li class="list-group-item border-0">{{p.name}}</li>
+                        <li class="list-group-item border-0">{{p.country}}</li>
+                        <li class="list-group-item border-0">
+
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6>MVP</h6>
+                </div>
+                <div class="card-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+<ng-template #none></ng-template>
