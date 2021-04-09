@@ -4,7 +4,7 @@ import {FormatService} from '../../services/format/format.service';
 import {GambleService} from '../../services/gamble/gamble.service';
 import {Gamble} from '../../interfaces/gamble';
 import {Subject} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
+import {take} from 'rxjs/operators';
 import {CompetitionService} from '../../services/competition/competition.service';
 
 @Component({
@@ -78,8 +78,9 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
         this.gambleService.getGamblesBySingleMatchId(match.id)
             .pipe(
-                takeUntil(this.unsubscribe$)
-            ).subscribe(
+                take(1)
+            )
+            .subscribe(
             res => {
                 gamble = res;
 
@@ -122,7 +123,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
         this.singleMatchesService.getSingleMatchById(id)
             .pipe(
-                takeUntil(this.unsubscribe$)
+                take(1)
             )
             .subscribe(
                 res => {
@@ -153,7 +154,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
         let match: any = [];
         this.singleMatchesService.getSingleMatchById(id)
             .pipe(
-                takeUntil(this.unsubscribe$)
+                take(1)
             )
             .subscribe(
                 res => {
