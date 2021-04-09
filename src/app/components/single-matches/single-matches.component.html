@@ -105,8 +105,8 @@
                                 name="{{sm.id}}"
                                 class="form-control form-control-sm mr-2"
                                 (change)="updateHomeScore($event.target, sm.id)"
+                                value="{{sm.homeTeamScore}}"
                             >
-                                <option value="{{sm.homeTeamScore}}">{{sm.homeTeamScore}}</option>
                                 <option value="0">0</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>

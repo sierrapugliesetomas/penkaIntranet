@@ -204,6 +204,9 @@ export class NewSingleMatchComponent implements OnInit {
             this.newSingleMatch.selected = '';
             this.newSingleMatch.startDate = newDateTime;
             this.newSingleMatch.limitDate = newDateTimeLimit;
+            this.newSingleMatch.homeTeamScore = 0;
+            this.newSingleMatch.visitTeamScore = 0;
+            this.newSingleMatch.draw = true;
             this.singleMatchesService.addMatch(this.newSingleMatch);
             this.router.navigate(['singleMatches']);
         } else {
