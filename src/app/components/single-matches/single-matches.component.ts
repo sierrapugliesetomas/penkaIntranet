@@ -1,10 +1,9 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {SingleMatchesService} from '../../services/singleMatches/single-matches.service';
-import {FormatService} from '../../services/format/format.service';
 import {GambleService} from '../../services/gamble/gamble.service';
 import {Gamble} from '../../interfaces/gamble';
 import {Subject} from 'rxjs';
-import {take} from 'rxjs/operators';
+import {take, takeUntil} from 'rxjs/operators';
 import {CompetitionService} from '../../services/competition/competition.service';
 
 @Component({
@@ -23,13 +22,13 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     constructor(
         private singleMatchesService: SingleMatchesService,
-        private formatService: FormatService,
         private gambleService: GambleService,
         private competitionService: CompetitionService) {
     }
 
     ngOnInit(): void {
         this.singleMatchesService.getSingleMatches()
+        .pipe(takeUntil(this.unsubscribe$))
             .subscribe(
                 res => {
                     this.singleMatches = res;
@@ -61,7 +60,6 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     // tslint:disable-next-line:typedef
     gameStatus(event, match) {
-
         if (event.value === '2') {
             if (confirm('Desea confirmar el partido por finalizado?')) {
                 this.singleMatchesService.updateStatus(match.id, event.value);
@@ -88,24 +86,19 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 for (let i = 0; i < gamble.length; i++) {
                     /* gamble PRO */
                     if (gamble[i].penkaFormat === 'PRO') {
-                        if (match.draw === true) {
+                        // exact result
+                        if ((match.homeTeamScore === gamble[i].homeTeamScore) && (match.visitTeamScore === gamble[i].visitTeamScore)) {
+                            score = 5;
+                        } // draw or winner but not exact result
+                        else if ((match.draw === true && gamble[i].draw) || (match.winnerId === gamble[i].winnerTeamId)) {
                             score = 3;
-                        }
-                        if (match.winnerId === gamble[i].winnerTeamId) {
-                            score = 3;
-                            if ((match.homeTeamScore === gamble[i].homeTeamScore) && (match.visitTeamScore === gamble[i].visitTeamScore)) {
-                                score = 5;
-                            }
                         } else {
                             score = 0;
                         }
                     }
                     /* gamble MEDIUM*/
                     if (gamble[i].penkaFormat === 'MEDIUM') {
-                        if (match.draw === true) {
-                            score = 3;
-                        }
-                        if (match.winnerId === gamble[i].winnerTeamId) {
+                        if (match.draw === true || match.winnerId === gamble[i].winnerTeamId) {
                             score = 3;
                         } else {
                             score = 0;
@@ -115,7 +108,6 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                     this.gambleService.updateScoreAchieve(gamble[i].id, score, '2');
                 }
             });
-        console.log(score);
     }
 
     updateHomeScore(event, id): void {
@@ -129,7 +121,8 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 res => {
 
                     match = res;
-                    this.singleMatchesService.updateHomeScore(id, event.value);
+                    this.singleMatchesService.updateHomeScore(id, Number(event.value));
+                    match.homeTeamScore = Number(event.value);
 
                     if (match.homeTeamScore > match.visitTeamScore) {
                         this.singleMatchesService.updateWinner(id, match.homeTeamId, match.homeTeamName, match.homeTeamFlag);
@@ -146,7 +139,6 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                         this.singleMatchesService.updateLoser(id, '', '', '');
                         this.singleMatchesService.updateDraw(id, true);
                     }
-
                 });
     }
 
@@ -159,7 +151,8 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
             .subscribe(
                 res => {
                     match = res;
-                    this.singleMatchesService.updateVisitScore(id, event.value);
+                    this.singleMatchesService.updateVisitScore(id, Number(event.value));
+                    match.visitTeamScore = Number(event.value);
                     if (match.homeTeamScore > match.visitTeamScore) {
                         this.singleMatchesService.updateWinner(id, match.homeTeamId, match.homeTeamName, match.homeTeamFlag);
                         this.singleMatchesService.updateLoser(id, match.visitTeamId, match.visitTeamName, match.visitTeamFlag);
@@ -175,7 +168,6 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                         this.singleMatchesService.updateLoser(id, '', '', '');
                         this.singleMatchesService.updateDraw(id, true);
                     }
-
                 });
     }
 
