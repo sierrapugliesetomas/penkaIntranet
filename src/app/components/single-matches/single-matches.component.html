@@ -96,15 +96,15 @@
                                     Publicar
                                 </button>
                             </ng-template>
-
+                            
                             <!-- Home Team -->
                             <img src="{{sm.homeTeamFlag}}" width="30" height="30" class="ml-4 mr-2">
                             <p class="mr-2 mt-3">{{sm.homeTeamAlias}}</p>
                             <!-- Score-->
                             <select
+                                #homeTeamSelect
                                 name="{{sm.id}}"
                                 class="form-control form-control-sm mr-2"
-                                (change)="updateHomeScore($event.target, sm.id)"
                                 value="{{sm.homeTeamScore}}"
                             >
                                 <option value="0">0</option>
@@ -124,9 +124,9 @@
                             <!-- Visit Team -->
                             <!-- Score -->
                             <select
+                                #visitTeamSelect
                                 name="{{sm.id}}"
                                 class="form-control form-control-sm mr-2"
-                                (change)="updateVisitScore($event.target, sm.id)"
                                 value="{{sm.visitTeamScore}}"
                             >
                                 <option value="0">0</option>
@@ -143,8 +143,14 @@
                             <p class="mr-2 mt-3">{{sm.visitTeamAlias}}</p>
 
                             <img src="{{sm.visitTeamFlag}}" width="30" height="30" class="mr-2">
+                            
+                            <button
+                                type="button"
+                                class="btn btn-success btn-sm mr-4 p-1" 
+                                (click)="updateTeamsScores(sm.id, homeTeamSelect.value, visitTeamSelect.value)">
+                                Guardar resultado
+                            </button>
                         </div>
-
                     </li>
                 </ul>
             </div>

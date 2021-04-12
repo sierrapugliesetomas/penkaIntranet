@@ -5,6 +5,7 @@ import {Gamble} from '../../interfaces/gamble';
 import {Subject} from 'rxjs';
 import {take, takeUntil} from 'rxjs/operators';
 import {CompetitionService} from '../../services/competition/competition.service';
+import { ParticipantsService } from 'src/app/services/participants/participants.service';
 
 @Component({
     selector: 'app-single-matches',
@@ -23,7 +24,8 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
     constructor(
         private singleMatchesService: SingleMatchesService,
         private gambleService: GambleService,
-        private competitionService: CompetitionService) {
+        private competitionService: CompetitionService,
+        private participantsService: ParticipantsService) {
     }
 
     ngOnInit(): void {
@@ -60,16 +62,6 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     // tslint:disable-next-line:typedef
     gameStatus(event, match) {
-        if (event.value === '2') {
-            if (confirm('Desea confirmar el partido por finalizado?')) {
-                this.singleMatchesService.updateStatus(match.id, event.value);
-            }
-        } else if (event.value === '1') {
-            if (confirm('Desea modificar el partido?')) {
-                this.singleMatchesService.updateStatus(match.id, event.value);
-            }
-        }
-
         /* get gambles match */
         let gamble = [] as Gamble[];
         let score = 0;
@@ -106,11 +98,30 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                     }
                     /*************************/
                     this.gambleService.updateScoreAchieve(gamble[i].id, score, '2');
+                    
+                    if (event.value === '2') {
+                        if (confirm('Desea confirmar el partido por finalizado?')) {
+                            this.singleMatchesService.updateStatus(match.id, event.value);
+                        }
+                    } else if (event.value === '1') {
+                        if (confirm('Desea modificar el partido?')) {
+                            this.singleMatchesService.updateStatus(match.id, event.value);
+                            // TODO: hacer un update del accumulatedScore de todas las participaciones que tenian este partido o apuesta.
+                            // dividir la parte de update status con la de calcular los puntajes
+                        }
+                    }
                 }
             });
     }
 
-    updateHomeScore(event, id): void {
+    updateTeamsScores(id, homeTeamScore: number, visitTeamScore: number): void {
+        if (confirm('Desea actualizar resultado del partido?')) {
+            this.updateHomeScore(homeTeamScore, id);
+            this.updateVisitScore(visitTeamScore, id);
+        }
+    }
+
+    updateHomeScore(value, id): void {
         let match: any = [];
 
         this.singleMatchesService.getSingleMatchById(id)
@@ -121,8 +132,8 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 res => {
 
                     match = res;
-                    this.singleMatchesService.updateHomeScore(id, Number(event.value));
-                    match.homeTeamScore = Number(event.value);
+                    this.singleMatchesService.updateHomeScore(id, value);
+                    match.homeTeamScore = value;
 
                     if (match.homeTeamScore > match.visitTeamScore) {
                         this.singleMatchesService.updateWinner(id, match.homeTeamId, match.homeTeamName, match.homeTeamFlag);
@@ -142,7 +153,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 });
     }
 
-    updateVisitScore(event, id): void {
+    updateVisitScore(value, id): void {
         let match: any = [];
         this.singleMatchesService.getSingleMatchById(id)
             .pipe(
@@ -151,8 +162,8 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
             .subscribe(
                 res => {
                     match = res;
-                    this.singleMatchesService.updateVisitScore(id, Number(event.value));
-                    match.visitTeamScore = Number(event.value);
+                    this.singleMatchesService.updateVisitScore(id, value);
+                    match.visitTeamScore = value;
                     if (match.homeTeamScore > match.visitTeamScore) {
                         this.singleMatchesService.updateWinner(id, match.homeTeamId, match.homeTeamName, match.homeTeamFlag);
                         this.singleMatchesService.updateLoser(id, match.visitTeamId, match.visitTeamName, match.visitTeamFlag);
