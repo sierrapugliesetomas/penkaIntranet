@@ -3,7 +3,7 @@ import {SingleMatchesService} from '../../services/singleMatches/single-matches.
 import {GambleService} from '../../services/gamble/gamble.service';
 import {Gamble} from '../../interfaces/gamble';
 import {Subject} from 'rxjs';
-import {take, takeUntil} from 'rxjs/operators';
+import {take} from 'rxjs/operators';
 import {CompetitionService} from '../../services/competition/competition.service';
 import { ParticipantsService } from 'src/app/services/participants/participants.service';
 import { SingleMatch } from 'src/app/interfaces/single-match';
@@ -31,7 +31,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.singleMatchesService.getSingleMatches()
-        .pipe(take(1)) //(this.unsubscribe$)
+        .pipe((take(1)))
             .subscribe(
                 res => {
                     this.singleMatches = res;
@@ -57,16 +57,33 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     publish(id): void {
         if (confirm('Esta seguro que desea Publicar el Partido?')) {
+            let updatedMatch: SingleMatch = this.singleMatches.find(match => match.id === id);
+            updatedMatch.publish = true;
             this.singleMatchesService.publish(id);
         }
     }
 
     // tslint:disable-next-line:typedef
     gameStatus(event, match) {
+       
+        let updatedMatch = this.singleMatches.find(m => m.id == match.id);
+        if (event.value === '2') {
+            if (confirm('Desea confirmar el partido por finalizado?')) {
+                updatedMatch.status = event.value;
+                this.singleMatchesService.updateStatus(match.id, event.value);
+            }
+        } else if (event.value === '1') {
+            if (confirm('Desea modificar el partido?')) {
+                updatedMatch.status = event.value;
+                this.singleMatchesService.updateStatus(match.id, event.value);
+                // TODO: hacer un update del accumulatedScore de todas las participaciones que tenian este partido o apuesta.
+                // dividir la parte de update status con la de calcular los puntajes
+            }
+        }
+        
         /* get gambles match */
         let gamble = [] as Gamble[];
         let score = 0;
-
         this.gambleService.getGamblesBySingleMatchId(match.id)
             .pipe(
                 take(1)
@@ -99,18 +116,6 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                     }
                     /*************************/
                     this.gambleService.updateScoreAchieve(gamble[i].id, score, '2');
-                    
-                    if (event.value === '2') {
-                        if (confirm('Desea confirmar el partido por finalizado?')) {
-                            this.singleMatchesService.updateStatus(match.id, event.value);
-                        }
-                    } else if (event.value === '1') {
-                        if (confirm('Desea modificar el partido?')) {
-                            this.singleMatchesService.updateStatus(match.id, event.value);
-                            // TODO: hacer un update del accumulatedScore de todas las participaciones que tenian este partido o apuesta.
-                            // dividir la parte de update status con la de calcular los puntajes
-                        }
-                    }
                 }
             });
     }
