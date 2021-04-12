@@ -65,6 +65,20 @@ export class SingleMatchesService {
         this.singleMatchesCollection.doc(id).update({visitTeamScore: score}).catch(error => console.log(error));
     }
 
+    updateAllTeamsScores(match: SingleMatch) {
+        this.singleMatchesCollection.doc(match.id).update({
+            homeTeamScore: match.homeTeamScore,
+            visitTeamScore: match.visitTeamScore,
+            winnerFlag: match.winnerFlag,
+            winnerId: match.winnerId,
+            winnerName: match.winnerName, 
+            loserId: match.loserId,
+            loserName: match.loserName,
+            loserFlag: match.loserFlag,
+            draw: match.draw
+        }).catch(error => console.log(error));    
+    }
+
     updateWinner(id, winnerId, winnerName, winnerFlag) {
         this.singleMatchesCollection.doc(id).update({
             winnerId,

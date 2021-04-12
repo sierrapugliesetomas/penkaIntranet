@@ -6,6 +6,7 @@ import {Subject} from 'rxjs';
 import {take, takeUntil} from 'rxjs/operators';
 import {CompetitionService} from '../../services/competition/competition.service';
 import { ParticipantsService } from 'src/app/services/participants/participants.service';
+import { SingleMatch } from 'src/app/interfaces/single-match';
 
 @Component({
     selector: 'app-single-matches',
@@ -30,7 +31,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.singleMatchesService.getSingleMatches()
-        .pipe(takeUntil(this.unsubscribe$))
+        .pipe(take(1)) //(this.unsubscribe$)
             .subscribe(
                 res => {
                     this.singleMatches = res;
@@ -116,70 +117,34 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     updateTeamsScores(id, homeTeamScore: number, visitTeamScore: number): void {
         if (confirm('Desea actualizar resultado del partido?')) {
-            this.updateHomeScore(homeTeamScore, id);
-            this.updateVisitScore(visitTeamScore, id);
+            let match: SingleMatch = this.singleMatches.find(m => m.id === id);
+            match.homeTeamScore = Number(homeTeamScore);
+            match.visitTeamScore = Number(visitTeamScore);
+            
+            if (match.homeTeamScore !== match.visitTeamScore) {
+                match.winnerId = match.homeTeamScore > match.visitTeamScore ? match.homeTeamId : match.visitTeamId;
+                match.winnerName = match.homeTeamScore > match.visitTeamScore ? match.homeTeamName : match.visitTeamName;
+                match.winnerFlag = match.homeTeamScore > match.visitTeamScore ? match.homeTeamFlag : match.visitTeamFlag;
+                
+                match.loserId = match.homeTeamScore < match.visitTeamScore ? match.homeTeamId : match.visitTeamId;
+                match.loserName = match.homeTeamScore < match.visitTeamScore ? match.homeTeamName : match.visitTeamName;
+                match.loserFlag = match.homeTeamScore < match.visitTeamScore ? match.homeTeamFlag : match.visitTeamFlag;
+                
+                match.draw = false;
+
+            } else {
+                // draw
+                match.winnerId = '';
+                match.winnerFlag = '';
+                match.winnerName = '';
+                
+                match.loserId = '';
+                match.loserFlag = '';
+                match.loserName = '';
+
+                match.draw = true;
+            }
+            this.singleMatchesService.updateAllTeamsScores(match);
         }
     }
-
-    updateHomeScore(value, id): void {
-        let match: any = [];
-
-        this.singleMatchesService.getSingleMatchById(id)
-            .pipe(
-                take(1)
-            )
-            .subscribe(
-                res => {
-
-                    match = res;
-                    this.singleMatchesService.updateHomeScore(id, value);
-                    match.homeTeamScore = value;
-
-                    if (match.homeTeamScore > match.visitTeamScore) {
-                        this.singleMatchesService.updateWinner(id, match.homeTeamId, match.homeTeamName, match.homeTeamFlag);
-                        this.singleMatchesService.updateLoser(id, match.visitTeamId, match.visitTeamName, match.visitTeamFlag);
-                        this.singleMatchesService.updateDraw(id, false);
-
-                    } else if (match.homeTeamScore < match.visitTeamScore) {
-                        this.singleMatchesService.updateWinner(id, match.visitTeamId, match.visitTeamName, match.visitTeamFlag);
-                        this.singleMatchesService.updateLoser(id, match.homeTeamId, match.homeTeamName, match.homeTeamFlag);
-                        this.singleMatchesService.updateDraw(id, false);
-
-                    } else if (match.homeTeamScore === match.visitTeamScore) {
-                        this.singleMatchesService.updateWinner(id, '', '', '');
-                        this.singleMatchesService.updateLoser(id, '', '', '');
-                        this.singleMatchesService.updateDraw(id, true);
-                    }
-                });
-    }
-
-    updateVisitScore(value, id): void {
-        let match: any = [];
-        this.singleMatchesService.getSingleMatchById(id)
-            .pipe(
-                take(1)
-            )
-            .subscribe(
-                res => {
-                    match = res;
-                    this.singleMatchesService.updateVisitScore(id, value);
-                    match.visitTeamScore = value;
-                    if (match.homeTeamScore > match.visitTeamScore) {
-                        this.singleMatchesService.updateWinner(id, match.homeTeamId, match.homeTeamName, match.homeTeamFlag);
-                        this.singleMatchesService.updateLoser(id, match.visitTeamId, match.visitTeamName, match.visitTeamFlag);
-                        this.singleMatchesService.updateDraw(id, false);
-
-                    } else if (match.homeTeamScore < match.visitTeamScore) {
-                        this.singleMatchesService.updateWinner(id, match.visitTeamId, match.visitTeamName, match.visitTeamFlag);
-                        this.singleMatchesService.updateLoser(id, match.homeTeamId, match.homeTeamName, match.homeTeamFlag);
-                        this.singleMatchesService.updateDraw(id, false);
-
-                    } else if (match.homeTeamScore === match.visitTeamScore) {
-                        this.singleMatchesService.updateWinner(id, '', '', '');
-                        this.singleMatchesService.updateLoser(id, '', '', '');
-                        this.singleMatchesService.updateDraw(id, true);
-                    }
-                });
-    }
-
 }
