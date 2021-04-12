@@ -30,6 +30,14 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        this.getSingleMatches();
+    }
+
+    ngOnDestroy(): void {
+        this.unsubscribe$.next();
+        this.unsubscribe$.complete();
+    }
+    private getSingleMatches(): void {
         this.singleMatchesService.getSingleMatches()
         .pipe((take(1)))
             .subscribe(
@@ -43,12 +51,6 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                     this.competitions = res;
                 }, error => console.log(error));
     }
-
-    ngOnDestroy(): void {
-        this.unsubscribe$.next();
-        this.unsubscribe$.complete();
-    }
-
     updateDateMatch(event, id): void {
         const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         const startDate = event.day + ' de ' + months[(event.month - 1)] + ' de ' + event.year;
@@ -65,12 +67,13 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     // tslint:disable-next-line:typedef
     gameStatus(event, match) {
-       
         let updatedMatch = this.singleMatches.find(m => m.id == match.id);
         if (event.value === '2') {
             if (confirm('Desea confirmar el partido por finalizado?')) {
                 updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
+            } else {
+                event.value = match.status; // old value, prevent change select
             }
         } else if (event.value === '1') {
             if (confirm('Desea modificar el partido?')) {
@@ -78,9 +81,15 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 this.singleMatchesService.updateStatus(match.id, event.value);
                 // TODO: hacer un update del accumulatedScore de todas las participaciones que tenian este partido o apuesta.
                 // dividir la parte de update status con la de calcular los puntajes
+            } else {
+                event.value = match.status; // old value, prevent change select
             }
         }
-        
+        this.updateGambleStatus(match);
+        this.getSingleMatches();
+    }
+
+    updateGambleStatus(match): void {
         /* get gambles match */
         let gamble = [] as Gamble[];
         let score = 0;
@@ -115,7 +124,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                         }
                     }
                     /*************************/
-                    this.gambleService.updateScoreAchieve(gamble[i].id, score, '2');
+                    this.gambleService.updateScoreAchieve(gamble[i].id, score, match.status);
                 }
             });
     }
