@@ -3,10 +3,13 @@ import {SingleMatchesService} from '../../services/singleMatches/single-matches.
 import {GambleService} from '../../services/gamble/gamble.service';
 import {Gamble} from '../../interfaces/gamble';
 import {Subject} from 'rxjs';
-import {take} from 'rxjs/operators';
+import {take, takeUntil} from 'rxjs/operators';
 import {CompetitionService} from '../../services/competition/competition.service';
 import { ParticipantsService } from 'src/app/services/participants/participants.service';
 import { SingleMatch } from 'src/app/interfaces/single-match';
+import {Participant} from '../../interfaces/participant';
+import { PenkaService } from 'src/app/services/penka/penka.service';
+import { ListMatchesService } from 'src/app/services/listMatches/list-matches.service';
 
 @Component({
     selector: 'app-single-matches',
@@ -26,8 +29,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
         private singleMatchesService: SingleMatchesService,
         private gambleService: GambleService,
         private competitionService: CompetitionService,
-        private participantsService: ParticipantsService) {
-    }
+        private participantsService: ParticipantsService) { }
 
     ngOnInit(): void {
         this.getSingleMatches();
@@ -39,7 +41,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
     }
     private getSingleMatches(): void {
         this.singleMatchesService.getSingleMatches()
-        .pipe((take(1)))
+        .pipe(takeUntil(this.unsubscribe$))
             .subscribe(
                 res => {
                     this.singleMatches = res;
@@ -59,9 +61,9 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     publish(id): void {
         if (confirm('Esta seguro que desea Publicar el Partido?')) {
+            this.singleMatchesService.publish(id);
             let updatedMatch: SingleMatch = this.singleMatches.find(match => match.id === id);
             updatedMatch.publish = true;
-            this.singleMatchesService.publish(id);
         }
     }
 
@@ -72,6 +74,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
             if (confirm('Desea confirmar el partido por finalizado?')) {
                 updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
+                this.updateGamblesStatus(match);
             } else {
                 event.value = match.status; // old value, prevent change select
             }
@@ -79,17 +82,15 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
             if (confirm('Desea modificar el partido?')) {
                 updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
-                // TODO: hacer un update del accumulatedScore de todas las participaciones que tenian este partido o apuesta.
-                // dividir la parte de update status con la de calcular los puntajes
+                this.updateGamblesStatus(match);
             } else {
                 event.value = match.status; // old value, prevent change select
             }
         }
-        this.updateGambleStatus(match);
         this.getSingleMatches();
     }
 
-    updateGambleStatus(match): void {
+    updateGamblesStatus(match): void {
         /* get gambles match */
         let gamble = [] as Gamble[];
         let score = 0;
@@ -117,7 +118,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                     }
                     /* gamble MEDIUM*/
                     if (gamble[i].penkaFormat === 'MEDIUM') {
-                        if (match.draw === true || match.winnerId === gamble[i].winnerTeamId) {
+                        if (match.draw === true && gamble[i].draw || match.winnerId === gamble[i].winnerTeamId) {
                             score = 3;
                         } else {
                             score = 0;
@@ -125,8 +126,18 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                     }
                     /*************************/
                     this.gambleService.updateScoreAchieve(gamble[i].id, score, match.status);
+                    this.updateParticipantAccumulatedScore(gamble[i], score);
                 }
             });
+    }
+
+    private updateParticipantAccumulatedScore(gamble: Gamble, score: number): void {
+            // add gamble score to participant accumulatedScore 
+            this.participantsService.getParticipantByGamble(gamble.userId, gamble.codePenka).pipe(take(1)).subscribe( 
+                (participant: Participant[]) => {
+                  let newScore =  participant[0].accumulatedScore + score;
+                  this.participantsService.updateScore(participant[0].id, newScore);
+              })  
     }
 
     updateTeamsScores(id, homeTeamScore: number, visitTeamScore: number): void {
