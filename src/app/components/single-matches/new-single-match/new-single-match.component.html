@@ -56,39 +56,6 @@
                         </div>
                     </div>
                     <hr>
-                    <!-- LIMIT DATE AND TIME -->
-                    <div class="form-row">
-                        <div class="col">
-                            <p>Fecha/Hora Limite:</p>
-                        </div>
-                        <div class="col">
-                            <div class="input-group mr-2">
-                                <input
-                                    class="form-control"
-                                    name="limitDate"
-                                    [minDate]="minDate"
-                                    ngbDatepicker #c="ngbDatepicker"
-                                    (dateSelect)="updateDateLimit($event)"
-                                >
-                                <div class="input-group-append">
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-secondary calendar"
-                                        (click)="c.toggle()"
-                                    >
-                                    </button>
-                                </div>
-                                <input
-                                    type="time"
-                                    class="form-control"
-                                    name="limitTime"
-                                    value="{{matchTimeLimit}}"
-                                    (change)="updateTimeLimit($event.target)"
-                                >
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
 
                     <!-- PICK TYPE TEAM -->
                     <div class="form-row">

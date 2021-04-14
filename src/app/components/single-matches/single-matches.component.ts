@@ -8,8 +8,6 @@ import {CompetitionService} from '../../services/competition/competition.service
 import { ParticipantsService } from 'src/app/services/participants/participants.service';
 import { SingleMatch } from 'src/app/interfaces/single-match';
 import {Participant} from '../../interfaces/participant';
-import { PenkaService } from 'src/app/services/penka/penka.service';
-import { ListMatchesService } from 'src/app/services/listMatches/list-matches.service';
 
 @Component({
     selector: 'app-single-matches',
