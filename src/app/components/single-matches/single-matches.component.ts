@@ -186,7 +186,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                     this.participantsService.getParticipantByCodePenka(p.codePenka).pipe(take(1)).subscribe(
                         res => {
                             // ToDO: set podio ganadores
-                            res.forEach(participant => this.participantsService.updateStatus(participant.id, match.status));
+                            res.forEach(participant => this.participantsService.updateStatus(participant.id, '9'));
                         }
                     )
                     this.penkasService.updateStatus(p.id, match.status);
