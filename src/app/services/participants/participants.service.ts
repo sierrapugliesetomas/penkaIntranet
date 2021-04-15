@@ -72,4 +72,8 @@ export class ParticipantsService {
     updateStatus(id, status): any {
         this.participantsCollection.doc(id).update({status}).catch();
     }
+
+    updatePlace(id, place): void {
+        this.participantsCollection.doc(id).update({place}).catch();
+    }
 }
