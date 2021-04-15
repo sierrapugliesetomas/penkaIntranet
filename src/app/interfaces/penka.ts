@@ -7,7 +7,7 @@ export interface Penka {
     makerId?: string;
     makerName?: string;
     makerEmail?: string;
-    singleMatchId?: string;
+    singleMatchesId?: string[];
     tournamentId?: string;
     tournamentName?: string;
     formatName?: string;
@@ -15,4 +15,5 @@ export interface Penka {
     distributionBet?: number;
     accumulatedBet?: number;
     date?: string;
+    status?: string;
 }
