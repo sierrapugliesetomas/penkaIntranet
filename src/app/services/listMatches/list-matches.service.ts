@@ -27,17 +27,6 @@ export class ListMatchesService {
         return this.listMatches;
     }
 
-    // Get list matches by code penka and single match id
-    getListMatchesCodePenkaMatchId(singleMatchId, codePenka) {
-        return this.afs.collection<ListMatches>('ListMatches', ref => ref.where('singleMatchId', '==', singleMatchId)
-            .where('codePenka', '==', codePenka)).snapshotChanges().pipe(
-            map(actions => actions.map(a => {
-                const data = a.payload.doc.data() as ListMatches;
-                const id = a.payload.doc.id;
-                return {id, ...data};
-            }))
-        );
-    }
 
     // Get list matches by code penka and single match id
     getListMatchesByCodeTemplate(singleMatchId, codeTemplate) {

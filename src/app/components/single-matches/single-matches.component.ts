@@ -8,6 +8,7 @@ import {CompetitionService} from '../../services/competition/competition.service
 import { ParticipantsService } from 'src/app/services/participants/participants.service';
 import { SingleMatch } from 'src/app/interfaces/single-match';
 import {Participant} from '../../interfaces/participant';
+import { PenkaService } from 'src/app/services/penka/penka.service';
 
 @Component({
     selector: 'app-single-matches',
@@ -27,7 +28,8 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
         private singleMatchesService: SingleMatchesService,
         private gambleService: GambleService,
         private competitionService: CompetitionService,
-        private participantsService: ParticipantsService) { }
+        private participantsService: ParticipantsService,
+        private penkasService: PenkaService) { }
 
     ngOnInit(): void {
         this.getSingleMatches();
@@ -73,6 +75,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
                 this.updateGamblesStatus(match);
+                this.updatePenkasStatus(match);
             } else {
                 event.value = match.status; // old value, prevent change select
             }
@@ -81,6 +84,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
                 this.updateGamblesStatus(match);
+                this.updatePenkasStatus(match);
             } else {
                 event.value = match.status; // old value, prevent change select
             }
@@ -169,5 +173,25 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
             }
             this.singleMatchesService.updateAllTeamsScores(match);
         }
+    }
+
+    private updatePenkasStatus(match: SingleMatch) {
+        // finish/close all associated penkas to this match
+        this.penkasService.getPenkasBySingleMatchId(match.id).pipe(take(1)).subscribe(
+            res => {
+                const relatedPenkas = res;
+                relatedPenkas.forEach(p => {
+                   const openMatches = this.singleMatches.filter( sm => p.singleMatchesId.includes(sm.id));
+                   if (openMatches.length === 0) {
+                    this.participantsService.getParticipantByCodePenka(p.codePenka).pipe(take(1)).subscribe(
+                        res => {
+                            // ToDO: set podio ganadores
+                            res.forEach(participant => this.participantsService.updateStatus(participant.id, match.status));
+                        }
+                    )
+                    this.penkasService.updateStatus(p.id, match.status);
+                    }
+                });
+            });
     }
 }

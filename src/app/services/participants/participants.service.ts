@@ -55,8 +55,7 @@ export class ParticipantsService {
         return this.afs.collection<Participant>('participants', ref => ref
             .where('codePenka', '==', codePenka)
             .where('status', 'in', ['1', '2', '9'])
-            .orderBy('accumulatedScore', 'desc')
-            .limit(1))
+            .orderBy('accumulatedScore', 'desc'))
             .snapshotChanges()
             .pipe(map(actions => actions.map(a => {
                     const data = a.payload.doc.data() as Participant;
@@ -68,5 +67,9 @@ export class ParticipantsService {
 
     updateScore(id, accumulatedScore: number): any {
         this.participantsCollection.doc(id).update({accumulatedScore}).catch(error => console.log(error));
+    }
+
+    updateStatus(id, status): any {
+        this.participantsCollection.doc(id).update({status}).catch();
     }
 }

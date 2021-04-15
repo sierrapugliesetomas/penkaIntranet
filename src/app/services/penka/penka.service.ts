@@ -48,4 +48,20 @@ export class PenkaService {
                 }))
             );
     }
+
+    getPenkasBySingleMatchId(singleMatchId) {
+        return this.afs.collection<Penka>('penkas', ref => ref
+        .where('status', '==', '1')
+        .where('singleMatchesId', 'array-contains', singleMatchId)).snapshotChanges().pipe(
+            map(actions => actions.map(a => {
+                const data = a.payload.doc.data() as Penka;
+                const id = a.payload.doc.id;
+                return {id, ...data};
+            }))
+        );
+    }
+
+    updateStatus(id, status) {
+        this.penkasCollection.doc(id).update({status}).catch(error => console.log(error));
+    }
 }
