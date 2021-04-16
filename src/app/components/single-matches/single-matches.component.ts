@@ -186,12 +186,42 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                     this.participantsService.getParticipantByCodePenka(p.codePenka).pipe(take(1)).subscribe(
                         res => {
                             // ToDO: set podio ganadores
-                            res.forEach(participant => this.participantsService.updateStatus(participant.id, '9'));
+                            const participants = res;
+                            participants.forEach(participant => this.participantsService.updateStatus(participant.id, '9'));
+                            this.setWinners(participants);
                         }
                     )
-                    this.penkasService.updateStatus(p.id, match.status);
+                    this.penkasService.updateStatus(p.id, '2');
                     }
                 });
             });
+    }
+
+    private setWinners(participants: Participant[]) {
+        let winners = [];
+        participants.sort((p1, p2) => (p1.accumulatedScore > p2.accumulatedScore) ? -1 : 1 );
+
+        const places = ['primero', 'segundo', 'tercero'];
+        let placesIndex = 0;
+        let previousScore = 0;
+        
+        for (let index = 0; (index < participants.length && placesIndex <= 3); index++) {
+            let actual = participants[index];
+
+            if (previousScore === 0 || previousScore === actual.accumulatedScore ) {
+                this.participantsService.updatePlace(actual.id, places[placesIndex]);
+                previousScore = actual.accumulatedScore;
+                winners.push(actual);
+
+            } else {
+                if(winners.length < 3) {
+                    placesIndex++;
+                    previousScore = actual.accumulatedScore;
+                    winners.push(actual);
+                    this.participantsService.updatePlace(actual.id, places[placesIndex]);
+                }
+            }
+        }
+        // console.log(winners)
     }
 }
