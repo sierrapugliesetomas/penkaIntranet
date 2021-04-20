@@ -4,8 +4,12 @@ export interface Participant {
     userId?: string;
     userName?: string;
     userEmail?: string;
+    userPhoto?: string;
     formatName?: string;
+    visibility?: string;
     bet?: number;
     accumulatedScore?: number;
-    date?: string;
+    date?: Date;
+    status?: string;
+    place?: string;
 }

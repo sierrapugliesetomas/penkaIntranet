@@ -171,39 +171,23 @@ export class NewSingleMatchComponent implements OnInit {
         this.matchTime = event.value + ':00';
     }
 
-    updateDateLimit(event): void {
-        let day = '';
-        let month = '';
-
-        if (event.day < 10) {
-            day = '0' + event.day;
-        } else {
-            day = event.day;
-        }
-        if (event.month < 10) {
-            month = '0' + event.month;
-        } else {
-            month = event.month;
-        }
-        this.matchDateLimit = event.year + '-' + month + '-' + day + 'T';
-    }
-
-    updateTimeLimit(event): void {
-        this.matchTimeLimit = event.value + ':00';
-    }
-
     add(): void {
-        const dateTimeLimit = this.matchDateLimit + this.matchTimeLimit;
-        const newDateTimeLimit = new Date(dateTimeLimit);
-        const dateTime = this.matchDate + this.matchTime;
-        const newDateTime = new Date(dateTime);
+        const startTime = this.matchDate + this.matchTime;
+        const startDate = new Date(startTime);
+
+        const limitDate = new Date()
+        limitDate.setTime(startDate.getTime() - 1800000); // 30 min in milisec
+
 
         if (this.newSingleMatch.homeTeamId && this.newSingleMatch.visitTeamId) {
             this.newSingleMatch.status = '1';
             this.newSingleMatch.publish = false;
             this.newSingleMatch.selected = '';
-            this.newSingleMatch.startDate = newDateTime;
-            this.newSingleMatch.limitDate = newDateTimeLimit;
+            this.newSingleMatch.startDate = startDate;
+            this.newSingleMatch.limitDate = limitDate;
+            this.newSingleMatch.homeTeamScore = 0;
+            this.newSingleMatch.visitTeamScore = 0;
+            this.newSingleMatch.draw = true;
             this.singleMatchesService.addMatch(this.newSingleMatch);
             this.router.navigate(['singleMatches']);
         } else {

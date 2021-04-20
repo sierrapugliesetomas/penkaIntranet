@@ -1,11 +1,14 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {SingleMatchesService} from '../../services/singleMatches/single-matches.service';
-import {FormatService} from '../../services/format/format.service';
 import {GambleService} from '../../services/gamble/gamble.service';
 import {Gamble} from '../../interfaces/gamble';
 import {Subject} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
+import {take, takeUntil} from 'rxjs/operators';
 import {CompetitionService} from '../../services/competition/competition.service';
+import { ParticipantsService } from 'src/app/services/participants/participants.service';
+import { SingleMatch } from 'src/app/interfaces/single-match';
+import {Participant} from '../../interfaces/participant';
+import { PenkaService } from 'src/app/services/penka/penka.service';
 
 @Component({
     selector: 'app-single-matches',
@@ -23,13 +26,22 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     constructor(
         private singleMatchesService: SingleMatchesService,
-        private formatService: FormatService,
         private gambleService: GambleService,
-        private competitionService: CompetitionService) {
-    }
+        private competitionService: CompetitionService,
+        private participantsService: ParticipantsService,
+        private penkasService: PenkaService) { }
 
     ngOnInit(): void {
+        this.getSingleMatches();
+    }
+
+    ngOnDestroy(): void {
+        this.unsubscribe$.next();
+        this.unsubscribe$.complete();
+    }
+    private getSingleMatches(): void {
         this.singleMatchesService.getSingleMatches()
+        .pipe(takeUntil(this.unsubscribe$))
             .subscribe(
                 res => {
                     this.singleMatches = res;
@@ -41,12 +53,6 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                     this.competitions = res;
                 }, error => console.log(error));
     }
-
-    ngOnDestroy(): void {
-        this.unsubscribe$.next();
-        this.unsubscribe$.complete();
-    }
-
     updateDateMatch(event, id): void {
         const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         const startDate = event.day + ' de ' + months[(event.month - 1)] + ' de ' + event.year;
@@ -56,30 +62,45 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
     publish(id): void {
         if (confirm('Esta seguro que desea Publicar el Partido?')) {
             this.singleMatchesService.publish(id);
+            let updatedMatch: SingleMatch = this.singleMatches.find(match => match.id === id);
+            updatedMatch.publish = true;
         }
     }
 
     // tslint:disable-next-line:typedef
     gameStatus(event, match) {
-
+        let updatedMatch = this.singleMatches.find(m => m.id == match.id);
         if (event.value === '2') {
             if (confirm('Desea confirmar el partido por finalizado?')) {
+                updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
+                this.updateGamblesStatus(match);
+                this.updatePenkasStatus(match);
+            } else {
+                event.value = match.status; // old value, prevent change select
             }
         } else if (event.value === '1') {
             if (confirm('Desea modificar el partido?')) {
+                updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
+                this.updateGamblesStatus(match);
+                this.updatePenkasStatus(match);
+            } else {
+                event.value = match.status; // old value, prevent change select
             }
         }
+        this.getSingleMatches();
+    }
 
+    updateGamblesStatus(match): void {
         /* get gambles match */
         let gamble = [] as Gamble[];
         let score = 0;
-
         this.gambleService.getGamblesBySingleMatchId(match.id)
             .pipe(
-                takeUntil(this.unsubscribe$)
-            ).subscribe(
+                take(1)
+            )
+            .subscribe(
             res => {
                 gamble = res;
 
@@ -87,95 +108,120 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 for (let i = 0; i < gamble.length; i++) {
                     /* gamble PRO */
                     if (gamble[i].penkaFormat === 'PRO') {
-                        if (match.draw === true) {
+                        // exact result
+                        if ((match.homeTeamScore === gamble[i].homeTeamScore) && (match.visitTeamScore === gamble[i].visitTeamScore)) {
+                            score = 5;
+                        } // draw or winner but not exact result
+                        else if ((match.draw === true && gamble[i].draw) || (match.winnerId === gamble[i].winnerTeamId)) {
                             score = 3;
-                        }
-                        if (match.winnerId === gamble[i].winnerTeamId) {
-                            score = 3;
-                            if ((match.homeTeamScore === gamble[i].homeTeamScore) && (match.visitTeamScore === gamble[i].visitTeamScore)) {
-                                score = 5;
-                            }
                         } else {
                             score = 0;
                         }
                     }
                     /* gamble MEDIUM*/
                     if (gamble[i].penkaFormat === 'MEDIUM') {
-                        if (match.draw === true) {
-                            score = 3;
-                        }
-                        if (match.winnerId === gamble[i].winnerTeamId) {
+                        if (match.draw === true && gamble[i].draw || match.winnerId === gamble[i].winnerTeamId) {
                             score = 3;
                         } else {
                             score = 0;
                         }
                     }
                     /*************************/
-                    this.gambleService.updateScoreAchieve(gamble[i].id, score, '2');
+                    this.gambleService.updateScoreAchieve(gamble[i].id, score, match.status);
+                    this.updateParticipantAccumulatedScore(gamble[i], score);
                 }
             });
-        console.log(score);
     }
 
-    updateHomeScore(event, id): void {
-        let match: any = [];
+    private updateParticipantAccumulatedScore(gamble: Gamble, score: number): void {
+            // add gamble score to participant accumulatedScore 
+            this.participantsService.getParticipantByGamble(gamble.userId, gamble.codePenka).pipe(take(1)).subscribe( 
+                (participant: Participant[]) => {
+                  let newScore =  participant[0].accumulatedScore + score;
+                  this.participantsService.updateScore(participant[0].id, newScore);
+              })  
+    }
 
-        this.singleMatchesService.getSingleMatchById(id)
-            .pipe(
-                takeUntil(this.unsubscribe$)
-            )
-            .subscribe(
-                res => {
+    updateTeamsScores(id, homeTeamScore: number, visitTeamScore: number): void {
+        if (confirm('Desea actualizar resultado del partido?')) {
+            let match: SingleMatch = this.singleMatches.find(m => m.id === id);
+            match.homeTeamScore = Number(homeTeamScore);
+            match.visitTeamScore = Number(visitTeamScore);
+            
+            if (match.homeTeamScore !== match.visitTeamScore) {
+                match.winnerId = match.homeTeamScore > match.visitTeamScore ? match.homeTeamId : match.visitTeamId;
+                match.winnerName = match.homeTeamScore > match.visitTeamScore ? match.homeTeamName : match.visitTeamName;
+                match.winnerFlag = match.homeTeamScore > match.visitTeamScore ? match.homeTeamFlag : match.visitTeamFlag;
+                
+                match.loserId = match.homeTeamScore < match.visitTeamScore ? match.homeTeamId : match.visitTeamId;
+                match.loserName = match.homeTeamScore < match.visitTeamScore ? match.homeTeamName : match.visitTeamName;
+                match.loserFlag = match.homeTeamScore < match.visitTeamScore ? match.homeTeamFlag : match.visitTeamFlag;
+                
+                match.draw = false;
 
-                    match = res;
-                    this.singleMatchesService.updateHomeScore(id, event.value);
+            } else {
+                // draw
+                match.winnerId = '';
+                match.winnerFlag = '';
+                match.winnerName = '';
+                
+                match.loserId = '';
+                match.loserFlag = '';
+                match.loserName = '';
 
-                    if (match.homeTeamScore > match.visitTeamScore) {
-                        this.singleMatchesService.updateWinner(id, match.homeTeamId, match.homeTeamName, match.homeTeamFlag);
-                        this.singleMatchesService.updateLoser(id, match.visitTeamId, match.visitTeamName, match.visitTeamFlag);
-                        this.singleMatchesService.updateDraw(id, false);
+                match.draw = true;
+            }
+            this.singleMatchesService.updateAllTeamsScores(match);
+        }
+    }
 
-                    } else if (match.homeTeamScore < match.visitTeamScore) {
-                        this.singleMatchesService.updateWinner(id, match.visitTeamId, match.visitTeamName, match.visitTeamFlag);
-                        this.singleMatchesService.updateLoser(id, match.homeTeamId, match.homeTeamName, match.homeTeamFlag);
-                        this.singleMatchesService.updateDraw(id, false);
-
-                    } else if (match.homeTeamScore === match.visitTeamScore) {
-                        this.singleMatchesService.updateWinner(id, '', '', '');
-                        this.singleMatchesService.updateLoser(id, '', '', '');
-                        this.singleMatchesService.updateDraw(id, true);
+    private updatePenkasStatus(match: SingleMatch) {
+        // finish/close all associated penkas to this match
+        this.penkasService.getPenkasBySingleMatchId(match.id).pipe(take(1)).subscribe(
+            res => {
+                const relatedPenkas = res;
+                relatedPenkas.forEach(p => {
+                   const openMatches = this.singleMatches.filter( sm => p.singleMatchesId.includes(sm.id));
+                   if (openMatches.length === 0) {
+                    this.participantsService.getParticipantByCodePenka(p.codePenka).pipe(take(1)).subscribe(
+                        res => {
+                            // ToDO: set podio ganadores
+                            const participants = res;
+                            participants.forEach(participant => this.participantsService.updateStatus(participant.id, '9'));
+                            this.setWinners(participants);
+                        }
+                    )
+                    this.penkasService.updateStatus(p.id, '2');
                     }
-
                 });
+            });
     }
 
-    updateVisitScore(event, id): void {
-        let match: any = [];
-        this.singleMatchesService.getSingleMatchById(id)
-            .pipe(
-                takeUntil(this.unsubscribe$)
-            )
-            .subscribe(
-                res => {
-                    match = res;
-                    this.singleMatchesService.updateVisitScore(id, event.value);
-                    if (match.homeTeamScore > match.visitTeamScore) {
-                        this.singleMatchesService.updateWinner(id, match.homeTeamId, match.homeTeamName, match.homeTeamFlag);
-                        this.singleMatchesService.updateLoser(id, match.visitTeamId, match.visitTeamName, match.visitTeamFlag);
-                        this.singleMatchesService.updateDraw(id, false);
+    private setWinners(participants: Participant[]) {
+        let winners = [];
+        participants.sort((p1, p2) => (p1.accumulatedScore > p2.accumulatedScore) ? -1 : 1 );
 
-                    } else if (match.homeTeamScore < match.visitTeamScore) {
-                        this.singleMatchesService.updateWinner(id, match.visitTeamId, match.visitTeamName, match.visitTeamFlag);
-                        this.singleMatchesService.updateLoser(id, match.homeTeamId, match.homeTeamName, match.homeTeamFlag);
-                        this.singleMatchesService.updateDraw(id, false);
+        const places = ['primero', 'segundo', 'tercero'];
+        let placesIndex = 0;
+        let previousScore = 0;
+        
+        for (let index = 0; (index < participants.length && placesIndex <= 3); index++) {
+            let actual = participants[index];
 
-                    } else if (match.homeTeamScore === match.visitTeamScore) {
-                        this.singleMatchesService.updateWinner(id, '', '', '');
-                        this.singleMatchesService.updateLoser(id, '', '', '');
-                        this.singleMatchesService.updateDraw(id, true);
-                    }
+            if (previousScore === 0 || previousScore === actual.accumulatedScore ) {
+                this.participantsService.updatePlace(actual.id, places[placesIndex]);
+                previousScore = actual.accumulatedScore;
+                winners.push(actual);
 
-                });
+            } else {
+                if(winners.length < 3) {
+                    placesIndex++;
+                    previousScore = actual.accumulatedScore;
+                    winners.push(actual);
+                    this.participantsService.updatePlace(actual.id, places[placesIndex]);
+                }
+            }
+        }
+        // console.log(winners)
     }
-
 }
