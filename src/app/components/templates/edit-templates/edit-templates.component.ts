@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FirebaseApp } from '@angular/fire';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireStorage, AngularFireUploadTask } from '@angular/fire/storage';
-import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { Observable, Subject } from 'rxjs';
+import { finalize, first, takeUntil } from 'rxjs/operators';
 import { Templates } from 'src/app/interfaces/templates';
 import { User } from 'src/app/interfaces/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -21,7 +21,7 @@ interface HtmlInputEvent extends Event {
   templateUrl: './edit-templates.component.html',
   styleUrls: ['./edit-templates.component.css']
 })
-export class EditTemplatesComponent implements OnInit {
+export class EditTemplatesComponent implements OnInit, OnDestroy {
     matchDateLimit: string;
     matchTimeLimit: string;
     file: File;
@@ -31,12 +31,19 @@ export class EditTemplatesComponent implements OnInit {
 
     newTemplate = {} as Templates;
     templates = [];
+    
+    // ToDo: nueva variable, eliminar las innecesarias
+    template = {}  as Templates;
+    templateMatches = [];
+
     codeTemplate: string;
     matches = [];
     user = {} as User;
     listMatches = [];
 
     minDate: { year: number, month: number, day: number };
+
+    private unsubscribe$ = new Subject<void>();
 
     constructor(
         private storage: AngularFireStorage,
@@ -46,22 +53,17 @@ export class EditTemplatesComponent implements OnInit {
         private router: Router,
         private templatesService: TemplatesService,
         private singleMatchesService: SingleMatchesService,
-        private listMatchesService: ListMatchesService) {
+        private listMatchesService: ListMatchesService,
+        private activatedRoute: ActivatedRoute,
+        ) {
     }
 
     // tslint:disable-next-line:typedef
     ngOnInit() {
-        this.user = this.firebase.auth().currentUser;
-        this.codeTemplate = '';
-        const characters = 'KvWxYz0123456789';
-        const charactersLength = characters.length;
-        for (let i = 0; i < charactersLength; i++) {
-            this.codeTemplate += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-
-        this.templatesService.getTemplate().subscribe(
-            res => this.templates = res,
-            error => console.log(error));
+        this.getCodeTemplate();
+        this.getUser();
+        this.getTemplate();
+        this.getTemplateMatches();
 
         this.singleMatchesService.getSingleMatches().subscribe(
             res => this.matches = res,
@@ -71,6 +73,39 @@ export class EditTemplatesComponent implements OnInit {
             res => this.listMatches = res,
             error => console.log(error));
 
+    }
+
+    private getUser(): void {
+        this.user = this.firebase.auth().currentUser;
+    }
+
+    private getCodeTemplate(): void {
+        this.activatedRoute.params.subscribe(
+            (params: Params) => {
+                console.log(params)
+                this.codeTemplate = params.id;
+            }
+        );
+    }
+
+    private getTemplate(): void {
+        this.templatesService.getTemplateByCode(this.codeTemplate).pipe(first()).subscribe(
+            res => {
+                this.template = res
+            },
+            error => {
+                console.log(error)
+            }
+        );
+    }
+
+    private getTemplateMatches(): void {
+        // si rompe, pasar a llamada manual takeFirst
+        this.listMatchesService.getListMatchesByCodeTemplate(this.codeTemplate)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(res => {
+            this.templateMatches = res;
+        });
     }
 
     onFlagSelected(event: HtmlInputEvent): void {
@@ -90,20 +125,20 @@ export class EditTemplatesComponent implements OnInit {
 
     // tslint:disable-next-line:typedef
     updateDateMatch(event) {
-        let day = '';
-        let month = '';
+        // let day = '';
+        // let month = '';
 
-        if (event.day < 10) {
-            day = '0' + event.day;
-        } else {
-            day = event.day;
-        }
-        if (event.month < 10) {
-            month = '0' + event.month;
-        } else {
-            month = event.month;
-        }
-        this.matchDateLimit = event.year + '-' + month + '-' + day + 'T';
+        // if (event.day < 10) {
+        //     day = '0' + event.day;
+        // } else {
+        //     day = event.day;
+        // }
+        // if (event.month < 10) {
+        //     month = '0' + event.month;
+        // } else {
+        //     month = event.month;
+        // }
+        // this.matchDateLimit = event.year + '-' + month + '-' + day + 'T';
     }
 
     // tslint:disable-next-line:typedef
@@ -112,66 +147,71 @@ export class EditTemplatesComponent implements OnInit {
     }
 
     addTemplate(flagUrl: HTMLInputElement): void {
-        const dateTimeLimit = this.matchDateLimit + this.matchTimeLimit;
-        const newDateTimeLimit = new Date(dateTimeLimit);
-        const today = new Date();
-        this.newTemplate.bannerUrl = flagUrl.value;
-        this.newTemplate.codeTemplate = this.codeTemplate;
-        this.newTemplate.date = today;
-        this.newTemplate.limitDate = newDateTimeLimit;
-        this.newTemplate.status = '0';
-        this.newTemplate.publish = false;
-        this.newTemplate.filed = false;
-        this.templatesService.addTemplate(this.newTemplate);
-        this.flagSelected = '';
-        flagUrl.value = '';
-        this.router.navigate(['/templates']);
+        // const dateTimeLimit = this.matchDateLimit + this.matchTimeLimit;
+        // const newDateTimeLimit = new Date(dateTimeLimit);
+        // const today = new Date();
+        // this.newTemplate.bannerUrl = flagUrl.value;
+        // this.newTemplate.codeTemplate = this.codeTemplate;
+        // this.newTemplate.date = today;
+        // this.newTemplate.limitDate = newDateTimeLimit;
+        // this.newTemplate.status = '0';
+        // this.newTemplate.publish = false;
+        // this.newTemplate.filed = false;
+        // this.templatesService.addTemplate(this.newTemplate);
+        // this.flagSelected = '';
+        // flagUrl.value = '';
+        // this.router.navigate(['/templates']);
     }
 
     addList(event, m, codeTemplate): void {
-        /// date
-        const today = new Date();
-        let match = [];
+        // /// date
+        // const today = new Date();
+        // let match = [];
 
-        // Get list matches by code penka and single match id
-        this.listMatchesService.getListMatchesByCodeTemplate(m.id, codeTemplate).subscribe(
-            res => {
-                match = res;
-                console.log(match);
+        // // Get list matches by code penka and single match id
+        // this.listMatchesService.getListMatchesByCodeTemplate(m.id, codeTemplate).subscribe(
+        //     res => {
+        //         match = res;
+        //         console.log(match);
 
-                if (match.length === 0) {
-                    this.listMatchesService.addMatch(
-                        m.id,
-                        m.codePenka = '',
-                        this.codeTemplate,
-                        this.user.uid,
-                        this.user.displayName,
-                        this.user.email,
-                        this.user.photoURL,
-                        today,
-                        m.homeTeamId,
-                        m.homeTeamName,
-                        m.homeTeamAlias,
-                        m.homeTeamFlag,
-                        m.visitTeamId,
-                        m.visitTeamName,
-                        m.visitTeamAlias,
-                        m.visitTeamFlag,
-                        m.startDate,
-                        m.limitDate,
-                        status = '1'
-                    );
+        //         if (match.length === 0) {
+        //             this.listMatchesService.addMatch(
+        //                 m.id,
+        //                 m.codePenka = '',
+        //                 this.codeTemplate,
+        //                 this.user.uid,
+        //                 this.user.displayName,
+        //                 this.user.email,
+        //                 this.user.photoURL,
+        //                 today,
+        //                 m.homeTeamId,
+        //                 m.homeTeamName,
+        //                 m.homeTeamAlias,
+        //                 m.homeTeamFlag,
+        //                 m.visitTeamId,
+        //                 m.visitTeamName,
+        //                 m.visitTeamAlias,
+        //                 m.visitTeamFlag,
+        //                 m.startDate,
+        //                 m.limitDate,
+        //                 status = '1'
+        //             );
 
-                } else {
-                    alert('Es partido ya fue seleccionado');
-                }
+        //         } else {
+        //             alert('Es partido ya fue seleccionado');
+        //         }
 
 
-            },
-            error => console.log(error));
+        //     },
+        //     error => console.log(error));
     }
 
     delete(id): void {
-        this.listMatchesService.deleteMatch(id);
+        // this.listMatchesService.deleteMatch(id);
+    }
+
+    ngOnDestroy(): void {
+        this.unsubscribe$.next();
+        this.unsubscribe$.complete();
     }
 }
