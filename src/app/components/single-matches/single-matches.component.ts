@@ -39,6 +39,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
         this.unsubscribe$.next();
         this.unsubscribe$.complete();
     }
+
     private getSingleMatches(): void {
         this.singleMatchesService.getSingleMatches()
         .pipe(takeUntil(this.unsubscribe$))
@@ -53,6 +54,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                     this.competitions = res;
                 }, error => console.log(error));
     }
+    
     updateDateMatch(event, id): void {
         const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         const startDate = event.day + ' de ' + months[(event.month - 1)] + ' de ' + event.year;
