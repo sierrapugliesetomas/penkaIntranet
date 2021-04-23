@@ -35,6 +35,19 @@ export class SingleMatchesService {
         return this.singleMatchesCollection.doc(id).valueChanges();
     }
 
+    getPublishedSingleMatches() {
+        return this.afs.collection<SingleMatch>('singleMatches', ref => ref
+        .where('status', '==', '1')
+        .where('publish', '==', true)
+        .orderBy('startDate', 'asc')).snapshotChanges().pipe(
+            map(actions => actions.map(a => {
+                const data = a.payload.doc.data() as SingleMatch;
+                const id = a.payload.doc.id;
+                return {id, ...data};
+            }))
+        );
+    }
+
     addMatch(singleMatch: SingleMatch) {
         this.singleMatchesCollection.add(singleMatch)
             .catch(error => console.log(error));

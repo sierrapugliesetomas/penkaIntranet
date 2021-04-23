@@ -65,8 +65,11 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
         this.getTemplate();
         this.getTemplateMatches();
 
-        this.singleMatchesService.getSingleMatches().subscribe(
-            res => this.matches = res,
+        this.singleMatchesService.getPublishedSingleMatches().subscribe(
+            res => {
+                const templateSingleMatches  = this.templateMatches.map(m => m.singleMatchId);
+                this.matches = res.filter( m => !templateSingleMatches.includes(m.id));
+            },
             error => console.log(error));
 
         this.listMatchesService.getListMatches().subscribe(
