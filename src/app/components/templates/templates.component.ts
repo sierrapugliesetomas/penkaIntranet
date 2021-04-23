@@ -117,7 +117,7 @@ export class TemplatesComponent implements OnInit, OnDestroy {
         }
     }
 
-    goToEdit(id): void {
-        this.router.navigate(['templates/edit/' + id])
+    goToEdit(codeTemplate): void {
+        this.router.navigate(['templates/edit/' + codeTemplate])
     }
 }
