@@ -134,7 +134,7 @@ export class NewTemplatesComponent implements OnInit {
         let match = [];
 
         // Get list matches by code penka and single match id
-        this.listMatchesService.getListMatchesByCodeTemplate(m.id, codeTemplate).subscribe(
+        this.listMatchesService.getListMatchesByCodeTemplateAndSingleMatchId(m.id, codeTemplate).subscribe(
             res => {
                 match = res;
                 console.log(match);

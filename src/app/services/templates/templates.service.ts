@@ -38,6 +38,16 @@ export class TemplatesService {
         );
     }
 
+    getTemplateByCode(code): any {
+        return this.afs.collection<Templates>('templates', ref => ref.where('codeTemplate', '==', code)
+        ).snapshotChanges().pipe(
+            map(actions => actions.map(a => {
+                const data = a.payload.doc.data() as Templates;
+                const id = a.payload.doc.id;
+                return {id, ...data};
+            }))
+        );
+    }
 
     addTemplate(templates: Templates): any {
         this.templatesCollection.add(templates).catch(error => console.log(error));
