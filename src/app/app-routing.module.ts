@@ -33,6 +33,7 @@ import {CompetitionsComponent} from './components/competitions/competitions.comp
 import {TemplatesComponent} from './components/templates/templates.component';
 import {NewTemplatesComponent} from './components/templates/new-templates/new-templates.component';
 import {HistoryTemplatesComponent} from './components/templates/history-templates/history-templates.component';
+import { EditTemplatesComponent } from './components/templates/edit-templates/edit-templates.component';
 
 const routes: Routes = [
     /* Futbol */
@@ -60,6 +61,8 @@ const routes: Routes = [
     {path: 'templates', component: TemplatesComponent, canActivate: [AuthGuard]},
     {path: 'templates/new', component: NewTemplatesComponent, canActivate: [AuthGuard]},
     {path: 'templates/history', component: HistoryTemplatesComponent, canActivate: [AuthGuard]},
+    {path: 'templates/edit/:id', component: EditTemplatesComponent, canActivate: [AuthGuard]},
+
 
     /* Tournament */
     {path: 'tournaments', component: TournamentComponent, canActivate: [AuthGuard]},

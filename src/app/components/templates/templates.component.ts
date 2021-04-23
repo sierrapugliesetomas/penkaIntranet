@@ -116,4 +116,8 @@ export class TemplatesComponent implements OnInit, OnDestroy {
             this.templatesService.stock(id);
         }
     }
+
+    goToEdit(id): void {
+        this.router.navigate(['templates/edit/' + id])
+    }
 }

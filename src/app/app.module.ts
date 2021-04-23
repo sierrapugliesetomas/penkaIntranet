@@ -68,6 +68,7 @@ import {HistoryTemplatesComponent} from './components/templates/history-template
 import {FilterCodeTemplatePipe} from './pipes/filter-code-template.pipe';
 import {FilterPublishPipe} from './pipes/filter-publish.pipe';
 import {FilterFiledPipe} from './pipes/filter-filed.pipe';
+import { EditTemplatesComponent } from './components/templates/edit-templates/edit-templates.component';
 
 @NgModule({
   declarations: [
@@ -130,6 +131,7 @@ import {FilterFiledPipe} from './pipes/filter-filed.pipe';
     FilterCodeTemplatePipe,
     FilterPublishPipe,
     FilterFiledPipe,
+    EditTemplatesComponent,
   ],
   imports: [
     BrowserModule,
