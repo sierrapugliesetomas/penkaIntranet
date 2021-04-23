@@ -30,16 +30,16 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
     downloadURL: Observable<string>;
 
     newTemplate = {} as Templates;
-    templates = [];
+    templates = []; // ToDo: eliminar
     
     // ToDo: nueva variable, eliminar las innecesarias
     template = {}  as Templates;
     templateMatches = [];
-
     codeTemplate: string;
     matches = [];
     user = {} as User;
-    listMatches = [];
+
+    listMatches = []; // ToDo: eliminar
 
     minDate: { year: number, month: number, day: number };
 
@@ -60,22 +60,11 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
 
     // tslint:disable-next-line:typedef
     ngOnInit() {
-        this.getCodeTemplate();
         this.getUser();
+        this.getCodeTemplate();
         this.getTemplate();
         this.getTemplateMatches();
-
-        this.singleMatchesService.getPublishedSingleMatches().subscribe(
-            res => {
-                const templateSingleMatches  = this.templateMatches.map(m => m.singleMatchId);
-                this.matches = res.filter( m => !templateSingleMatches.includes(m.id));
-            },
-            error => console.log(error));
-
-        this.listMatchesService.getListMatches().subscribe(
-            res => this.listMatches = res,
-            error => console.log(error));
-
+        this.getPublishSingleMatches();
     }
 
     private getUser(): void {
@@ -85,21 +74,19 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
     private getCodeTemplate(): void {
         this.activatedRoute.params.subscribe(
             (params: Params) => {
-                console.log(params)
                 this.codeTemplate = params.id;
-            }
-        );
+        });
     }
 
     private getTemplate(): void {
         this.templatesService.getTemplateByCode(this.codeTemplate).pipe(first()).subscribe(
             res => {
                 this.template = res
+                console.log(this.template)
             },
             error => {
                 console.log(error)
-            }
-        );
+        });
     }
 
     private getTemplateMatches(): void {
@@ -109,6 +96,15 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
         .subscribe(res => {
             this.templateMatches = res;
         });
+    }
+
+    private getPublishSingleMatches(): void {
+        this.singleMatchesService.getPublishedSingleMatches().subscribe(
+            res => {
+                const templateSingleMatches  = this.templateMatches.map(m => m.singleMatchId);
+                this.matches = res.filter( m => !templateSingleMatches.includes(m.id));
+            },
+            error => console.log(error));
     }
 
     onFlagSelected(event: HtmlInputEvent): void {

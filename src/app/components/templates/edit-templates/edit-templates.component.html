@@ -1,21 +1,21 @@
 <div class="row">
     <div class="col-6">
         <div class="card">
-            <h6 class="card-header">Nuevo Template</h6>
+            <h6 class="card-header">Editar template</h6>
             <div id="newTemplate" class="card-body">
                 <p>Partidos Seleccionados:</p>
-                <ul class="list-group" *ngFor="let lm of listMatches | filterCodeTemplate:codeTemplate">
+                <ul class="list-group" *ngFor="let tm of templateMatches">
                     <li class="list-group-item item mb-2 pt-0 pb-0">
                         <div class="form-inline float-left pt-0">
-                            <p class="mr-2 pt-3">{{lm.homeTeamAlias}}</p>
-                            <img alt="" class="mr-3" height="30" src="{{lm.homeTeamFlag}}" width="30">
+                            <p class="mr-2 pt-3">{{tm.homeTeamAlias}}</p>
+                            <img alt="" class="mr-3" height="30" src="{{tm.homeTeamFlag}}" width="30">
                             <p class="mr-3 pt-3 font-weight-bold">Vs</p>
-                            <img alt="" class="mr-2" height="30" src="{{lm.visitTeamFlag}}" width="30">
-                            <p class="pt-3 mr-4">{{lm.visitTeamAlias}}</p>
-                            <p class="pt-3">{{lm.startDate.toDate() | date:'d/M/yy - HH:mm'}}</p>
+                            <img alt="" class="mr-2" height="30" src="{{tm.visitTeamFlag}}" width="30">
+                            <p class="pt-3 mr-4">{{tm.visitTeamAlias}}</p>
+                            <p class="pt-3">{{tm.startDate.toDate() | date:'d/M/yy - HH:mm'}}</p>
                         </div>
                         <button
-                            (click)="delete(lm.id)"
+                            (click)="delete(tm.id)"
                             class="btn btn-danger btn-sm float-right mt-2"
                             type="button"
                         >
@@ -24,21 +24,22 @@
                     </li>
                 </ul>
             </div>
-            <div class="card-footer">
+            <!-- <div class="card-footer">
                 <form (ngSubmit)="addTemplate(flagUrl)">
                     <div class="form-row">
                         <input
-                            [(ngModel)]="newTemplate.name"
+                            [(ngModel)]="template.name"
                             class="form-control"
                             id="lbl-name"
                             name="name"
                             placeholder="Nombre del Template"
                             type="text"
+                            value="{{template.name}}"
                         >
                     </div>
-                    <br>
+                    <br> !-->
                     <!-- DATE TIME -->
-                    <div class="form-row">
+                    <!-- <div class="form-row">
                         <div class="col-3">
                             <p>Fecha/Hora Limite:</p>
                         </div>
@@ -109,14 +110,14 @@
                         Guardar
                     </button>
                 </form>
-            </div>
+            </div> -->
         </div>
     </div>
     <div class="col-6">
         <div class="card">
             <h6 class="card-header">Partidos Sueltos</h6>
             <div id="listMatches" class="card-body">
-                <ul *ngFor="let m of matches | filterStatus:'1' | filterPublish: true" class="list-group">
+                <ul *ngFor="let m of matches" class="list-group">
                     <li class="list-group-item item mb-2 pt-0 pb-0">
                         <button
                             (click)="addList($event, m, codeTemplate)"
