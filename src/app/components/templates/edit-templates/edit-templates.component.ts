@@ -47,10 +47,8 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
 
     constructor(
         private storage: AngularFireStorage,
-        private afs: AngularFirestore,
         public firebase: FirebaseApp,
         public auth: AuthService,
-        private router: Router,
         private templatesService: TemplatesService,
         private singleMatchesService: SingleMatchesService,
         private listMatchesService: ListMatchesService,
@@ -90,7 +88,6 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
     }
 
     private getTemplateMatches(): void {
-        // si rompe, pasar a llamada manual takeFirst
         this.listMatchesService.getListMatchesByCodeTemplate(this.codeTemplate)
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe(res => {
@@ -163,50 +160,54 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
     }
 
     addList(event, m, codeTemplate): void {
-        // /// date
-        // const today = new Date();
-        // let match = [];
+        /// date
+        const today = new Date();
+        let match = [];
 
-        // // Get list matches by code penka and single match id
-        // this.listMatchesService.getListMatchesByCodeTemplate(m.id, codeTemplate).subscribe(
-        //     res => {
-        //         match = res;
-        //         console.log(match);
+        // Get list matches by code penka and single match id
+        this.listMatchesService.getListMatchesByCodeTemplateAndSingleMatchId(m.id, codeTemplate)
+        .pipe(first())
+        .subscribe(
+            res => {
+                match = res;
+                console.log(match);
 
-        //         if (match.length === 0) {
-        //             this.listMatchesService.addMatch(
-        //                 m.id,
-        //                 m.codePenka = '',
-        //                 this.codeTemplate,
-        //                 this.user.uid,
-        //                 this.user.displayName,
-        //                 this.user.email,
-        //                 this.user.photoURL,
-        //                 today,
-        //                 m.homeTeamId,
-        //                 m.homeTeamName,
-        //                 m.homeTeamAlias,
-        //                 m.homeTeamFlag,
-        //                 m.visitTeamId,
-        //                 m.visitTeamName,
-        //                 m.visitTeamAlias,
-        //                 m.visitTeamFlag,
-        //                 m.startDate,
-        //                 m.limitDate,
-        //                 status = '1'
-        //             );
+                if (match.length === 0) {
+                    this.listMatchesService.addMatch(
+                        m.id,
+                        m.codePenka = '',
+                        this.codeTemplate,
+                        this.user.uid,
+                        this.user.displayName,
+                        this.user.email,
+                        this.user.photoURL,
+                        today,
+                        m.homeTeamId,
+                        m.homeTeamName,
+                        m.homeTeamAlias,
+                        m.homeTeamFlag,
+                        m.visitTeamId,
+                        m.visitTeamName,
+                        m.visitTeamAlias,
+                        m.visitTeamFlag,
+                        m.startDate,
+                        m.limitDate,
+                        status = '1'
+                    );
+                this.getPublishSingleMatches();
 
-        //         } else {
-        //             alert('Es partido ya fue seleccionado');
-        //         }
+                } else {
+                    alert('Es partido ya fue seleccionado');
+                }
 
 
-        //     },
-        //     error => console.log(error));
+            },
+            error => console.log(error));
     }
 
     delete(id): void {
-        // this.listMatchesService.deleteMatch(id);
+        this.listMatchesService.deleteMatch(id);
+        this.getPublishSingleMatches();
     }
 
     ngOnDestroy(): void {

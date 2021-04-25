@@ -30,7 +30,7 @@ export class ListMatchesService {
 
     // Get list matches by code penka and single match id
     getListMatchesByCodeTemplateAndSingleMatchId(singleMatchId, codeTemplate) {
-        return this.afs.collection<ListMatches>('ListMatches', ref => ref.where('singleMatchId', '==', singleMatchId)
+        return this.afs.collection<ListMatches>('listMatches', ref => ref.where('singleMatchId', '==', singleMatchId)
             .where('codeTemplate', '==', codeTemplate)).snapshotChanges().pipe(
             map(actions => actions.map(a => {
                 const data = a.payload.doc.data() as ListMatches;

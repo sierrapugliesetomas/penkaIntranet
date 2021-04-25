@@ -6,8 +6,8 @@
                 <div *ngIf="templates.length > 0; else none">
                     <p>Seleccionar una template para ver los partidos que contiene:</p>
                     <ul class="list-group">
-                        <li class="list-group-item item mb-2 p-2" *ngFor="let t of templates | filterFiled:false">
-                            <a (click)="showMatches(t.codeTemplate)" type="button">{{t.name}}</a>
+                        <li class="list-group-item item mb-2 p-2" *ngFor="let t of templates | filterFiled:false" (click)="showMatches(t.codeTemplate)" type="button">
+                            <a type="button">{{t.name}}</a>
                             <div *ngIf="t.publish === false; else disable">
                                 <button
                                     (click)="publish(t.id)"
