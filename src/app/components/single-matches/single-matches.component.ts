@@ -77,7 +77,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
                 this.updateGamblesStatus(match);
-                this.updatePenkasStatus(match);
+                // this.updatePenkasStatus(match);
             } else {
                 event.value = match.status; // old value, prevent change select
             }
@@ -86,7 +86,6 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
                 this.updateGamblesStatus(match);
-                this.updatePenkasStatus(match);
             } else {
                 event.value = match.status; // old value, prevent change select
             }
@@ -130,18 +129,21 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                     }
                     /*************************/
                     this.gambleService.updateScoreAchieve(gamble[i].id, score, match.status);
-                    this.updateParticipantAccumulatedScore(gamble[i], score);
+                    this.updateParticipantAccumulatedScore(gamble[i], score, match);
                 }
             });
     }
 
-    private updateParticipantAccumulatedScore(gamble: Gamble, score: number): void {
+    private updateParticipantAccumulatedScore(gamble: Gamble, score: number, match): void {
             // add gamble score to participant accumulatedScore 
             this.participantsService.getParticipantByGamble(gamble.userId, gamble.codePenka).pipe(take(1)).subscribe( 
                 (participant: Participant[]) => {
                   let newScore =  participant[0].accumulatedScore + score;
                   this.participantsService.updateScore(participant[0].id, newScore);
-              })  
+            
+                  // una vez finalizado el computo de puntajes, calculo los ganadores
+                  this.updatePenkasStatus(match);
+            })  
     }
 
     updateTeamsScores(id, homeTeamScore: number, visitTeamScore: number): void {
@@ -207,7 +209,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
         let placesIndex = 0;
         let previousScore = 0;
         
-        for (let index = 0; (index < participants.length && placesIndex <= 3); index++) {
+        for (let index = 0; (index < participants.length && placesIndex < 3); index++) {
             let actual = participants[index];
 
             if (previousScore === 0 || previousScore === actual.accumulatedScore ) {
@@ -224,6 +226,5 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 }
             }
         }
-        // console.log(winners)
     }
 }
