@@ -1,13 +1,15 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FirebaseApp } from '@angular/fire';
-import { AngularFirestore } from '@angular/fire/firestore';
-import { AngularFireStorage, AngularFireUploadTask } from '@angular/fire/storage';
+import { AbstractControl, FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
-import { finalize, first, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { first, takeUntil } from 'rxjs/operators';
+import { SingleMatch } from 'src/app/interfaces/single-match';
 import { Templates } from 'src/app/interfaces/templates';
 import { User } from 'src/app/interfaces/user';
 import { AuthService } from 'src/app/services/auth.service';
+import { ClubsService } from 'src/app/services/club/clubs.service';
+import { CountriesService } from 'src/app/services/country/countries.service';
 import { ListMatchesService } from 'src/app/services/listMatches/list-matches.service';
 import { SingleMatchesService } from 'src/app/services/singleMatches/single-matches.service';
 import { TemplatesService } from 'src/app/services/templates/templates.service';
@@ -22,43 +24,36 @@ interface HtmlInputEvent extends Event {
   styleUrls: ['./edit-templates.component.css']
 })
 export class EditTemplatesComponent implements OnInit, OnDestroy {
-    matchDateLimit: string;
-    matchTimeLimit: string;
-    file: File;
-    flagSelected: string | ArrayBuffer;
-    task: AngularFireUploadTask;
-    downloadURL: Observable<string>;
-
-    newTemplate = {} as Templates;
-    templates = []; // ToDo: eliminar
-    
     // ToDo: nueva variable, eliminar las innecesarias
     template = {}  as Templates;
     templateMatches = [];
     codeTemplate: string;
     matches = [];
     user = {} as User;
-
-    listMatches = []; // ToDo: eliminar
+    clubsAndCountries = [];
+    form: FormGroup;
 
     minDate: { year: number, month: number, day: number };
 
     private unsubscribe$ = new Subject<void>();
 
     constructor(
-        private storage: AngularFireStorage,
         public firebase: FirebaseApp,
         public auth: AuthService,
         private templatesService: TemplatesService,
         private singleMatchesService: SingleMatchesService,
         private listMatchesService: ListMatchesService,
+        private clubsService: ClubsService,
+        private countriesService: CountriesService,
         private activatedRoute: ActivatedRoute,
+        private formBuilder: FormBuilder,
         ) {
     }
 
     // tslint:disable-next-line:typedef
     ngOnInit() {
         this.getUser();
+        this.initForm();
         this.getCodeTemplate();
         this.getTemplate();
         this.getTemplateMatches();
@@ -79,8 +74,13 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
     private getTemplate(): void {
         this.templatesService.getTemplateByCode(this.codeTemplate).pipe(first()).subscribe(
             res => {
-                this.template = res
-                console.log(this.template)
+                this.template = res[0]
+                this.mvp.setValue(this.template.mvp);
+                this.maximumScorer.setValue(this.template.maximumScorer);
+                // ToDo: no se actualiza la vista del input, si su valor
+                this.champion.setValue(this.template.championName);
+                this.champion.updateValueAndValidity();
+                // ----------------------------------
             },
             error => {
                 console.log(error)
@@ -92,11 +92,14 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe(res => {
             this.templateMatches = res;
+            this.getTeams();
         });
     }
 
     private getPublishSingleMatches(): void {
-        this.singleMatchesService.getPublishedSingleMatches().subscribe(
+        this.singleMatchesService.getPublishedSingleMatches()
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(
             res => {
                 const templateSingleMatches  = this.templateMatches.map(m => m.singleMatchId);
                 this.matches = res.filter( m => !templateSingleMatches.includes(m.id));
@@ -104,60 +107,54 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
             error => console.log(error));
     }
 
-    onFlagSelected(event: HtmlInputEvent): void {
-        if (event.target.files && event.target.files[0]) {
-            this.file = (event.target.files[0] as File);
-            const reader = new FileReader();
-            reader.onload = e => this.flagSelected = reader.result;
-            reader.readAsDataURL(this.file);
-            const path = `templates/${Date.now()}_${this.file.name}`;
-            const ref = this.storage.ref(path);
-            this.task = this.storage.upload(path, this.file);
-            this.task.snapshotChanges().pipe(
-                finalize(() => this.downloadURL = ref.getDownloadURL())
-            ).subscribe();
-        }
+    private initForm(): void {
+        this.form = this.formBuilder.group({
+            mvp: [],
+            maximumScorer: [],
+            champion: [],
+        });
+    }
+
+    private getTeams() {
+        let idList = [];
+        this.clubsAndCountries = [];
+
+        this.templateMatches.forEach((m: SingleMatch) => {
+            if(!idList.includes(m.homeTeamId)) {
+                idList.push(m.homeTeamId);
+            } 
+
+            if(!idList.includes(m.visitTeamId)) {
+                idList.push(m.visitTeamId)
+            }
+        });
+
+        this.clubsService.getClubs()
+        .pipe(first())
+        .subscribe(
+            res => {
+                res.forEach(c => {
+                    if (idList.includes(c.id)) {
+                        this.clubsAndCountries.push(c);
+                    }
+                })
+                console.log(this.clubsAndCountries);
+        });
+
+        this.countriesService.getCountries()
+        .pipe(first())
+        .subscribe(
+            res => {
+                res.forEach(c => {
+                    if(idList.includes(c.id)) {
+                        this.clubsAndCountries.push(c);
+                    }
+                })
+                console.log(this.clubsAndCountries);
+            })
     }
 
     // tslint:disable-next-line:typedef
-    updateDateMatch(event) {
-        // let day = '';
-        // let month = '';
-
-        // if (event.day < 10) {
-        //     day = '0' + event.day;
-        // } else {
-        //     day = event.day;
-        // }
-        // if (event.month < 10) {
-        //     month = '0' + event.month;
-        // } else {
-        //     month = event.month;
-        // }
-        // this.matchDateLimit = event.year + '-' + month + '-' + day + 'T';
-    }
-
-    // tslint:disable-next-line:typedef
-    updateTimeMatch(event) {
-        this.matchTimeLimit = event.value + ':00';
-    }
-
-    addTemplate(flagUrl: HTMLInputElement): void {
-        // const dateTimeLimit = this.matchDateLimit + this.matchTimeLimit;
-        // const newDateTimeLimit = new Date(dateTimeLimit);
-        // const today = new Date();
-        // this.newTemplate.bannerUrl = flagUrl.value;
-        // this.newTemplate.codeTemplate = this.codeTemplate;
-        // this.newTemplate.date = today;
-        // this.newTemplate.limitDate = newDateTimeLimit;
-        // this.newTemplate.status = '0';
-        // this.newTemplate.publish = false;
-        // this.newTemplate.filed = false;
-        // this.templatesService.addTemplate(this.newTemplate);
-        // this.flagSelected = '';
-        // flagUrl.value = '';
-        // this.router.navigate(['/templates']);
-    }
 
     addList(event, m, codeTemplate): void {
         /// date
@@ -208,6 +205,26 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
     delete(id): void {
         this.listMatchesService.deleteMatch(id);
         this.getPublishSingleMatches();
+    }
+
+    saveForm(): void {
+        if(this.form.valid) {
+            this.templatesService.updateMvp(this.template.id, this.mvp.value);
+            this.templatesService.updateMaximumScorer(this.template.id, this.maximumScorer.value);
+            this.templatesService.updateChampion(this.template.id, this.clubsAndCountries.find(c => c.id === this.champion.value));
+        }
+    }
+
+    get maximumScorer(): AbstractControl {
+        return this.form.controls.maximumScorer;
+    }
+
+    get mvp(): AbstractControl {
+        return this.form.controls.mvp;
+    }
+
+    get champion(): AbstractControl {
+        return this.form.controls.champion;
     }
 
     ngOnDestroy(): void {

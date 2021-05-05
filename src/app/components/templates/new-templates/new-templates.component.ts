@@ -122,6 +122,11 @@ export class NewTemplatesComponent implements OnInit {
         this.newTemplate.status = '0';
         this.newTemplate.publish = false;
         this.newTemplate.filed = false;
+        this.newTemplate.mvp = '';
+        this.newTemplate.maximumScorer = '';
+        this.newTemplate.championId = '';
+        this.newTemplate.championAlias = '';
+        this.newTemplate.championName = '';
         this.templatesService.addTemplate(this.newTemplate);
         this.flagSelected = '';
         flagUrl.value = '';

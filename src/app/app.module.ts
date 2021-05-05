@@ -10,7 +10,7 @@ import {environment} from '../environments/environment';
 import {AngularFirestoreModule} from '@angular/fire/firestore';
 import {AngularFireStorageModule} from '@angular/fire/storage';
 import {NavigationComponent} from './components/navigation/navigation.component';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CountriesComponent} from './components/countries/countries.component';
 import {EditCountryComponent} from './components/countries/edit-country/edit-country.component';
 import {LeaguesComponent} from './components/leagues/leagues.component';
@@ -143,6 +143,7 @@ import { EditTemplatesComponent } from './components/templates/edit-templates/ed
     AngularFireAuthModule,
     NgbModule,
     NgbDatepickerModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

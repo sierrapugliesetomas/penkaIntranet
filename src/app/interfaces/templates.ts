@@ -8,4 +8,9 @@ export interface Templates {
     date?: Date;
     bannerUrl?: string;
     limitDate?: Date;
+    maximumScorer: string;
+    mvp: string;
+    championId: string;
+    championAlias: string;
+    championName: string;
 }

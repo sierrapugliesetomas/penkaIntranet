@@ -53,6 +53,22 @@ export class TemplatesService {
         this.templatesCollection.add(templates).catch(error => console.log(error));
     }
 
+    updateMvp(id, mvp) {
+        this.templatesCollection.doc(id).update({mvp: mvp}).catch();
+    }
+
+    updateMaximumScorer(id, maximumScorer) {
+        this.templatesCollection.doc(id).update({maximumScorer: maximumScorer}).catch();
+    }
+
+    updateChampion(id, champion) {
+        this.templatesCollection.doc(id).update({
+            championId: champion.id,
+            championAlias: champion.alias,
+            championName: champion.name
+        }).catch();
+    }
+
     delete(id): any {
         this.templatesCollection.doc(id).delete().catch();
     }
@@ -64,6 +80,4 @@ export class TemplatesService {
     stock(id): any {
         this.templatesCollection.doc(id).update({filed: true}).catch();
     }
-
-
 }
