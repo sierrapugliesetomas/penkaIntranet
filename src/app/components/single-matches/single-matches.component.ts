@@ -191,7 +191,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                         res => {
                             // ToDO: set podio ganadores
                             const participants = res;
-                            participants.forEach(participant => this.participantsService.updateStatus(participant.id, '9'));
+                            participants.forEach(participant => this.participantsService.updateStatus(participant.id, '2'));
                             this.setWinners(participants);
                         }
                     )
