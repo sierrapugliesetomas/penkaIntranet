@@ -78,7 +78,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
                 this.updateGamblesStatus(match);
-                // this.updatePenkasStatus(match);
+                this.updatePenkasStatus(match);
             } else {
                 event.value = match.status; // old value, prevent change select
             }
@@ -190,7 +190,6 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                    if (openMatches.length === 0) {
                     this.participantsService.getParticipantByCodePenka(p.codePenka).pipe(take(1)).subscribe(
                         res => {
-                            // ToDO: set podio ganadores
                             const participants = res;
                             participants.forEach(participant => this.participantsService.updateStatus(participant.id, '2'));
                             this.setWinners(participants);
