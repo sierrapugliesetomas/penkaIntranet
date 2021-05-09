@@ -97,7 +97,7 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
     }
 
     private getPublishSingleMatches(): void {
-        this.singleMatchesService.getPublishedSingleMatches()
+        this.singleMatchesService.getSingleMatchesByStatus()
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe(
             res => {

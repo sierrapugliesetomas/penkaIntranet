@@ -22,6 +22,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
     singleMatches = [];
     competitions = [];
 
+    statusFilter = '1';
     private unsubscribe$ = new Subject<void>();
 
     constructor(
@@ -40,8 +41,8 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
         this.unsubscribe$.complete();
     }
 
-    private getSingleMatches(): void {
-        this.singleMatchesService.getSingleMatches()
+    getSingleMatches(): void {
+        this.singleMatchesService.getSingleMatchesByStatus(this.statusFilter)
         .pipe(takeUntil(this.unsubscribe$))
             .subscribe(
                 res => {
