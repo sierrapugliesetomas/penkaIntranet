@@ -78,7 +78,6 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
                 this.updateGamblesStatus(match);
-                this.updatePenkasStatus(match);
             } else {
                 event.value = match.status; // old value, prevent change select
             }
@@ -188,7 +187,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 relatedPenkas.forEach(p => {
                    const openMatches = this.singleMatches.filter( sm => p.singleMatchesId.includes(sm.id));
                    if (openMatches.length === 0) {
-                    this.participantsService.getParticipantByCodePenka(p.codePenka).pipe(take(1)).subscribe(
+                    this.participantsService.getParticipantByCodePenka(p.codePenka).pipe(takeUntil(this.unsubscribe$)).subscribe(
                         res => {
                             const participants = res;
                             participants.forEach(participant => this.participantsService.updateStatus(participant.id, '2'));
@@ -203,7 +202,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     private setWinners(participants: Participant[]) {
         let winners = [];
-        participants.sort((p1, p2) => (p1.accumulatedScore > p2.accumulatedScore) ? -1 : 1 );
+        participants.sort((p1, p2) => (p1.accumulatedScore > p2.accumulatedScore) ? -1 : 1 ); // ToDo: esto ya viene ordenado en teoria
 
         const places = ['primero', 'segundo', 'tercero'];
         let placesIndex = 0;

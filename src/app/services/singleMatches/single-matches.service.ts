@@ -38,9 +38,21 @@ export class SingleMatchesService {
     getSingleMatchesByStatus(status = '1') {
         return this.afs.collection<SingleMatch>('singleMatches', ref => ref
         .where('status', '==', status)
-        .where('publish', '==', true)
         .orderBy('startDate', 'desc')
         .limit(20)).snapshotChanges().pipe(
+            map(actions => actions.map(a => {
+                const data = a.payload.doc.data() as SingleMatch;
+                const id = a.payload.doc.id;
+                return {id, ...data};
+            }))
+        );
+    }
+
+    getSingleMatchesPublishByStatus(status = '1') {
+        return this.afs.collection<SingleMatch>('singleMatches', ref => ref
+        .where('status', '==', status)
+        .where('publish', '==', true)
+        .orderBy('startDate', 'desc')).snapshotChanges().pipe(
             map(actions => actions.map(a => {
                 const data = a.payload.doc.data() as SingleMatch;
                 const id = a.payload.doc.id;

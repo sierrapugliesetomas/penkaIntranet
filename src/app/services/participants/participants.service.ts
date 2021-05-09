@@ -54,7 +54,7 @@ export class ParticipantsService {
     getParticipantByCodePenka(codePenka): any { /* participant.ts */
         return this.afs.collection<Participant>('participants', ref => ref
             .where('codePenka', '==', codePenka)
-            .where('status', 'in', ['1', '2', '9'])
+            // .where('status', 'in', ['1', '2', '9'])
             .orderBy('accumulatedScore', 'desc'))
             .snapshotChanges()
             .pipe(map(actions => actions.map(a => {
