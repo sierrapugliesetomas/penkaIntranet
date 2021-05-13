@@ -4,7 +4,7 @@
             <h6 class="card-header">Nuevo Template</h6>
             <div id="newTemplate" class="card-body">
                 <p>Partidos Seleccionados:</p>
-                <ul class="list-group" *ngFor="let lm of listMatches | filterCodeTemplate:codeTemplate">
+                <ul class="list-group" *ngFor="let lm of listMatches">
                     <li class="list-group-item item mb-2 pt-0 pb-0">
                         <div class="form-inline float-left pt-0">
                             <p class="mr-2 pt-3">{{lm.homeTeamAlias}}</p>

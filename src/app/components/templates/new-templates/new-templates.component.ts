@@ -7,9 +7,9 @@ import {Router} from '@angular/router';
 import {TemplatesService} from '../../../services/templates/templates.service';
 import {SingleMatchesService} from '../../../services/singleMatches/single-matches.service';
 import {ListMatchesService} from '../../../services/listMatches/list-matches.service';
-import {finalize} from 'rxjs/operators';
+import {finalize, first, takeUntil} from 'rxjs/operators';
 import {AngularFireStorage, AngularFireUploadTask} from '@angular/fire/storage';
-import {Observable} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import {AngularFirestore} from '@angular/fire/firestore';
 
 interface HtmlInputEvent extends Event {
@@ -37,6 +37,7 @@ export class NewTemplatesComponent implements OnInit {
     listMatches = [];
 
     minDate: { year: number, month: number, day: number };
+    private unsubscribe$ = new Subject<void>();
 
     constructor(
         private storage: AngularFireStorage,
@@ -52,27 +53,41 @@ export class NewTemplatesComponent implements OnInit {
     // tslint:disable-next-line:typedef
     ngOnInit() {
         this.user = this.firebase.auth().currentUser;
-        this.codeTemplate = '';
-        const characters = 'KvWxYz0123456789';
-        const charactersLength = characters.length;
-        for (let i = 0; i < charactersLength; i++) {
-            this.codeTemplate += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-
+        this.codeTemplate = this.generateCodeTemplate();
+        this.getAvailableSingleMatches();
+        
         this.templatesService.getTemplate().subscribe(
             res => this.templates = res,
             error => console.log(error));
 
-        this.singleMatchesService.getSingleMatches().subscribe(
-            res => this.matches = res,
-            error => console.log(error));
-
-        this.listMatchesService.getListMatches().subscribe(
-            res => this.listMatches = res,
+        this.listMatchesService.getListMatches().pipe(takeUntil(this.unsubscribe$)).subscribe(
+            res => this.listMatches = res.filter(lm => lm.codeTemplate === this.codeTemplate),
             error => console.log(error));
 
     }
 
+    private getAvailableSingleMatches(): void {
+        this.singleMatchesService.getSingleMatches()
+        .pipe(first())
+        .subscribe(
+            res => {
+                const templatelistMatches  = this.listMatches.map(m => m.singleMatchId);
+                this.matches =  res.filter( m => !templatelistMatches.includes(m.id));
+            },
+            error => console.log(error));
+
+    }
+
+    private generateCodeTemplate(): string {
+        let codeTemplate = '';
+        const characters = 'KvWxYz0123456789';
+        const charactersLength = characters.length;
+        for (let i = 0; i < charactersLength; i++) {
+            codeTemplate += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+
+        return codeTemplate;
+    }
     onFlagSelected(event: HtmlInputEvent): void {
         if (event.target.files && event.target.files[0]) {
             this.file = (event.target.files[0] as File);
@@ -139,7 +154,9 @@ export class NewTemplatesComponent implements OnInit {
         let match = [];
 
         // Get list matches by code penka and single match id
-        this.listMatchesService.getListMatchesByCodeTemplateAndSingleMatchId(m.id, codeTemplate).subscribe(
+        this.listMatchesService.getListMatchesByCodeTemplateAndSingleMatchId(m.id, codeTemplate)
+        .pipe(first())
+        .subscribe(
             res => {
                 match = res;
                 console.log(match);
@@ -166,6 +183,7 @@ export class NewTemplatesComponent implements OnInit {
                         m.limitDate,
                         status = '1'
                     );
+                    this.getAvailableSingleMatches();
 
                 } else {
                     alert('Es partido ya fue seleccionado');
@@ -178,5 +196,6 @@ export class NewTemplatesComponent implements OnInit {
 
     delete(id): void {
         this.listMatchesService.deleteMatch(id);
+        this.getAvailableSingleMatches()
     }
 }
