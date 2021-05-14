@@ -28,7 +28,6 @@ interface HtmlInputEvent extends Event {
   styleUrls: ['./edit-templates.component.css']
 })
 export class EditTemplatesComponent implements OnInit, OnDestroy {
-    // ToDo: nueva variable, eliminar las innecesarias
     template = {}  as Templates;
     templateMatches = [];
     codeTemplate: string;
@@ -84,7 +83,7 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
                 this.template = res[0]
                 this.mvp.setValue(this.template.mvp);
                 this.maximumScorer.setValue(this.template.maximumScorer);
-                // ToDo: no se actualiza la vista del input, si su valor
+                // ToDo: no se actualiza la vista del input pero si su valor - refactor
                 this.champion.setValue(this.template.championName);
                 this.champion.updateValueAndValidity();
                 // ----------------------------------
