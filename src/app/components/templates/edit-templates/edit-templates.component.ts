@@ -4,13 +4,17 @@ import { AbstractControl, FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
+import { Gamble } from 'src/app/interfaces/gamble';
 import { SingleMatch } from 'src/app/interfaces/single-match';
 import { Templates } from 'src/app/interfaces/templates';
 import { User } from 'src/app/interfaces/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ClubsService } from 'src/app/services/club/clubs.service';
 import { CountriesService } from 'src/app/services/country/countries.service';
+import { GambleService } from 'src/app/services/gamble/gamble.service';
 import { ListMatchesService } from 'src/app/services/listMatches/list-matches.service';
+import { ParticipantsService } from 'src/app/services/participants/participants.service';
+import { PenkaService } from 'src/app/services/penka/penka.service';
 import { SingleMatchesService } from 'src/app/services/singleMatches/single-matches.service';
 import { TemplatesService } from 'src/app/services/templates/templates.service';
 
@@ -47,6 +51,9 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
         private countriesService: CountriesService,
         private activatedRoute: ActivatedRoute,
         private formBuilder: FormBuilder,
+        private penkaService: PenkaService,
+        private participantsService: ParticipantsService,
+        private gambleService: GambleService
         ) {
     }
 
@@ -138,7 +145,6 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
                         this.clubsAndCountries.push(c);
                     }
                 })
-                console.log(this.clubsAndCountries);
         });
 
         this.countriesService.getCountries()
@@ -150,7 +156,6 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
                         this.clubsAndCountries.push(c);
                     }
                 })
-                console.log(this.clubsAndCountries);
             })
     }
 
@@ -167,8 +172,6 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
         .subscribe(
             res => {
                 match = res;
-                console.log(match);
-
                 if (match.length === 0) {
                     this.listMatchesService.addMatch(
                         m.id,
@@ -192,6 +195,7 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
                         status = '1'
                     );
                 this.getPublishSingleMatches();
+                this.addNewGambles(m, codeTemplate);
 
                 } else {
                     alert('Es partido ya fue seleccionado');
@@ -202,9 +206,59 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
             error => console.log(error));
     }
 
-    delete(id): void {
-        this.listMatchesService.deleteMatch(id);
+    private async addNewGambles(match, codeTemplate) {
+        const penkas = await this.penkaService.getPenkasByCodeTemplate(codeTemplate).pipe(first()).toPromise();
+        penkas.forEach(penka => {
+            this.participantsService.getParticipantByCodePenka(penka.codePenka)
+            .pipe(first())
+            .subscribe(res => {
+                res.forEach(part => this.addGamble(match, penka))
+            })
+        });        
+    }
+
+    private addGamble(match, penka) {
+        let newGamble = {} as Gamble;
+        
+        // ---------------------------------- //
+        newGamble.codePenka = penka.codePenka;
+        newGamble.penkaFormat = penka.formatName;
+        newGamble.singleMatchId = match.id;
+        newGamble.userId = this.user.uid;
+        newGamble.userName = this.user.displayName;
+        newGamble.userEmail = this.user.email;
+        newGamble.userPhoto = this.user.photoURL;
+        newGamble.homeTeamId = match.homeTeamId;
+        newGamble.homeTeamName = match.homeTeamName;
+        newGamble.homeTeamAlias = match.homeTeamAlias;
+        newGamble.homeTeamFlag = match.homeTeamFlag;
+        newGamble.homeTeamScore = 0;
+        newGamble.visitTeamId = match.visitTeamId;
+        newGamble.visitTeamName = match.visitTeamName;
+        newGamble.visitTeamAlias = match.visitTeamAlias;
+        newGamble.visitTeamFlag = match.visitTeamFlag;
+        newGamble.visitTeamScore = 0;
+        newGamble.date = new Date();
+        newGamble.winnerTeamId = '';
+        newGamble.draw = true;
+        newGamble.status = '1';
+        newGamble.saved = false;
+        newGamble.scoreAchieved = 0;
+        newGamble.startDate = match.startDate;
+        newGamble.limitDate = match.limitDate;  
+        // ---------------------------------- //
+        this.gambleService.addGamble(newGamble);
+    }
+
+    delete(tm): void {
+        this.listMatchesService.deleteMatch(tm.id);
         this.getPublishSingleMatches();
+        this.deleteMatchGambles(tm.singleMatchId);
+    }
+
+    private async deleteMatchGambles(singleMatchId) {
+        const relatedGambles = await this.gambleService.getGamblesBySingleMatchId(singleMatchId).pipe(first()).toPromise();
+        relatedGambles.forEach(g => this.gambleService.deleteGamble(g.id));
     }
 
     saveForm(): void {
