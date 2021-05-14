@@ -60,5 +60,11 @@ export class GambleService {
         this.gambleCollection.doc(id).update({status}).then();
     }
 
+    addGamble(gamble: Gamble) {
+        this.gambleCollection.add(gamble).catch(error => console.log(error));
+    }
 
+    deleteGamble(id) {
+        this.gambleCollection.doc(id).delete().then();
+    }
 }
