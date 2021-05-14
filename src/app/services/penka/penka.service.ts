@@ -61,6 +61,19 @@ export class PenkaService {
         );
     }
 
+    getPenkasByCodeTemplate(codeTemplate): any {
+        return this.afs.collection<Penka>('penkas', ref => ref
+            .where('codeTemplate', '==', codeTemplate)
+            .where('status', '==', '1')
+            .orderBy('dateLimit', 'asc'))
+            .snapshotChanges().pipe(map(actions => actions.map(a => {
+                    const data = a.payload.doc.data() as Penka;
+                    const id = a.payload.doc.id;
+                    return {id, ...data};
+                }))
+            );
+    }
+
     updateStatus(id, status) {
         this.penkasCollection.doc(id).update({status}).catch(error => console.log(error));
     }
