@@ -27,18 +27,19 @@ export interface Gamble {
     homeTeamId?: string;
     homeTeamName?: string;
     homeTeamAlias?: string;
-    homeTeamFlagUrl?: string;
+    homeTeamFlag?: string;
     homeTeamScore?: number;
     visitTeamId: string;
     visitTeamName?: string;
     visitTeamAlias?: string;
-    visitTeamFlagUrl?: string;
+    visitTeamFlag?: string;
     visitTeamScore?: number;
     winnerTeamId?: string;
     draw?: boolean;
-    date?: string;
-    save?: boolean;
+    date: Date;
+    saved?: boolean;
     scoreAchieved?: number;
-    isDefault: boolean;
     status?: string;
+    startDate: Date;
+    limitDate: Date;
 }
