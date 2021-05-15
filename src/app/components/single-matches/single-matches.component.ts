@@ -5,10 +5,10 @@ import {Gamble} from '../../interfaces/gamble';
 import {Subject} from 'rxjs';
 import {first, take, takeUntil} from 'rxjs/operators';
 import {CompetitionService} from '../../services/competition/competition.service';
-import { ParticipantsService } from 'src/app/services/participants/participants.service';
-import { SingleMatch } from 'src/app/interfaces/single-match';
+import {ParticipantsService} from 'src/app/services/participants/participants.service';
+import {SingleMatch} from 'src/app/interfaces/single-match';
 import {Participant} from '../../interfaces/participant';
-import { PenkaService } from 'src/app/services/penka/penka.service';
+import {PenkaService} from 'src/app/services/penka/penka.service';
 
 @Component({
     selector: 'app-single-matches',
@@ -34,6 +34,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.getSingleMatches();
+        this.getCompetitions();
     }
 
     ngOnDestroy(): void {
@@ -43,17 +44,21 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     getSingleMatches(): void {
         this.singleMatchesService.getSingleMatchesByStatus(this.statusFilter)
-        .pipe(takeUntil(this.unsubscribe$))
-            .subscribe(
-                res => {
-                    this.singleMatches = res;
-                }, error => console.log(error));
+            .pipe(takeUntil(this.unsubscribe$))
+                .subscribe(
+                    res => {
+                        this.singleMatches = res;
+                    }, error => console.log(error)
+            );
+    }
 
+    private getCompetitions(): void {
         this.competitionService.getCompetitions()
             .subscribe(
                 res => {
                     this.competitions = res;
-                }, error => console.log(error));
+                }, error => console.log(error)
+            );
     }
     
     updateDateMatch(event, id): void {
@@ -90,7 +95,6 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 event.value = match.status; // old value, prevent change select
             }
         }
-        // this.getSingleMatches();
     }
 
     updateGamblesStatus(match, newStatus): void {
