@@ -6,7 +6,7 @@
     </div>
     <div class="col-lg-3">
         <div class="toolbar-content">
-            <select class="form-control" value="1" [(ngModel)]="statusFilter" (change)="getSingleMatches()">
+            <select class="form-control" [(ngModel)]="statusFilter" (change)="getSingleMatches()">
                 <option value="1" selected>Por Jugarse</option>
                 <option value="2">Terminado</option>
             </select>

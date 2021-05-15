@@ -3,7 +3,7 @@ import {SingleMatchesService} from '../../services/singleMatches/single-matches.
 import {GambleService} from '../../services/gamble/gamble.service';
 import {Gamble} from '../../interfaces/gamble';
 import {Subject} from 'rxjs';
-import {take, takeUntil} from 'rxjs/operators';
+import {first, take, takeUntil} from 'rxjs/operators';
 import {CompetitionService} from '../../services/competition/competition.service';
 import { ParticipantsService } from 'src/app/services/participants/participants.service';
 import { SingleMatch } from 'src/app/interfaces/single-match';
@@ -77,29 +77,29 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
             if (confirm('Desea confirmar el partido por finalizado?')) {
                 updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
-                this.updateGamblesStatus(match);
+                this.updateGamblesStatus(updatedMatch, event.value);
             } else {
                 event.value = match.status; // old value, prevent change select
             }
         } else if (event.value === '1') {
-            if (confirm('Desea modificar el partido?')) {
+            if (confirm('Desea publicar nuevamente el partido?')) {
                 updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
-                this.updateGamblesStatus(match);
+                this.updateGamblesStatus(updatedMatch, event.value);
             } else {
                 event.value = match.status; // old value, prevent change select
             }
         }
-        this.getSingleMatches();
+        // this.getSingleMatches();
     }
 
-    updateGamblesStatus(match): void {
+    updateGamblesStatus(match, newStatus): void {
         /* get gambles match */
         let gamble = [] as Gamble[];
         let score = 0;
         this.gambleService.getGamblesBySingleMatchId(match.id)
             .pipe(
-                take(1)
+                first()
             )
             .subscribe(
             res => {
@@ -128,7 +128,16 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                         }
                     }
                     /*************************/
-                    this.gambleService.updateScoreAchieve(gamble[i].id, score, match.status);
+
+                    if(match.status === '1') {
+                        // revert finished gamble
+                        score = score * -1;
+                        this.gambleService.updateScoreAchieve(gamble[i].id, 0, match.status);
+
+                    } else {
+                        // status 2
+                        this.gambleService.updateScoreAchieve(gamble[i].id, score, match.status);
+                    }
                     this.updateParticipantAccumulatedScore(gamble[i], score, match);
                 }
             });
@@ -136,7 +145,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     private updateParticipantAccumulatedScore(gamble: Gamble, score: number, match): void {
             // add gamble score to participant accumulatedScore 
-            this.participantsService.getParticipantByGamble(gamble.userId, gamble.codePenka).pipe(take(1)).subscribe( 
+            this.participantsService.getParticipantByGamble(gamble.userId, gamble.codePenka).pipe(first()).subscribe( 
                 (participant: Participant[]) => {
                   let newScore =  participant[0].accumulatedScore + score;
                   this.participantsService.updateScore(participant[0].id, newScore);
@@ -185,25 +194,36 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
             res => {
                 const relatedPenkas = res;
                 relatedPenkas.forEach(p => {
-                   const openMatches = this.singleMatches.filter( sm => p.singleMatchesId.includes(sm.id));
-                   if (openMatches.length === 0) {
-                    this.participantsService.getParticipantByCodePenka(p.codePenka).pipe(takeUntil(this.unsubscribe$)).subscribe(
+                    this.singleMatchesService.getSingleMatchesByStatus('1').pipe(take(1)).subscribe(
                         res => {
-                            const participants = res;
-                            participants.forEach(participant => this.participantsService.updateStatus(participant.id, '2'));
-                            this.setWinners(participants);
+                            const openMatches =  res.filter( sm => p.singleMatchesId.includes(sm.id));
+                            if ((openMatches.length === 0 && p.status === '1') || (openMatches.length === 1 && p.status === '2')) {
+                                this.updateParticipationStatus(p, match);
+                            }
                         }
                     )
-                    this.penkasService.updateStatus(p.id, '2');
-                    }
                 });
-            });
+        });
     }
+
+    private updateParticipationStatus(p, match): void {
+        this.participantsService.getParticipantByCodePenka(p.codePenka).pipe(take(1)).subscribe( // ToDO: verificar que traiga los resultados completos y no de a partes, sino aumentar take
+            res => {
+                const participants = res;
+                participants.forEach(participant => this.participantsService.updateStatus(participant.id, match.status));
+                
+                if (match.status === '2') {
+                    this.setWinners(participants);
+                } else {
+                    participants.forEach(p => this.participantsService.updatePlace(p.id, ''));
+                }
+            });
+        this.penkasService.updateStatus(p.id, match.status);
+    }
+    
 
     private setWinners(participants: Participant[]) {
         let winners = [];
-        participants.sort((p1, p2) => (p1.accumulatedScore > p2.accumulatedScore) ? -1 : 1 ); // ToDo: esto ya viene ordenado en teoria
-
         const places = ['primero', 'segundo', 'tercero'];
         let placesIndex = 0;
         let previousScore = 0;
