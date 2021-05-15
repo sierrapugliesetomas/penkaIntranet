@@ -194,11 +194,11 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     private updatePenkasStatus(match: SingleMatch) {
         // finish/close all associated penkas to this match
-        this.penkasService.getPenkasBySingleMatchId(match.id).pipe(take(1)).subscribe(
+        this.penkasService.getPenkasBySingleMatchId(match.id).pipe(first()).subscribe(
             res => {
                 const relatedPenkas = res;
                 relatedPenkas.forEach(p => {
-                    this.singleMatchesService.getSingleMatchesByStatus('1').pipe(take(1)).subscribe(
+                    this.singleMatchesService.getSingleMatchesByStatus('1').pipe(first()).subscribe(
                         res => {
                             const openMatches =  res.filter( sm => p.singleMatchesId.includes(sm.id));
                             if ((openMatches.length === 0 && p.status === '1') || (openMatches.length === 1 && p.status === '2')) {
@@ -211,7 +211,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
     }
 
     private updateParticipationStatus(p, match): void {
-        this.participantsService.getParticipantByCodePenka(p.codePenka).pipe(take(1)).subscribe( // ToDO: verificar que traiga los resultados completos y no de a partes, sino aumentar take
+        this.participantsService.getParticipantByCodePenka(p.codePenka).pipe(first()).subscribe( // ToDO: verificar que traiga los resultados completos y no de a partes, sino aumentar take
             res => {
                 const participants = res;
                 participants.forEach(participant => this.participantsService.updateStatus(participant.id, match.status));
