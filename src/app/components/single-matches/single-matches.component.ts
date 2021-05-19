@@ -3,7 +3,7 @@ import {SingleMatchesService} from '../../services/singleMatches/single-matches.
 import {GambleService} from '../../services/gamble/gamble.service';
 import {Gamble} from '../../interfaces/gamble';
 import {Subject} from 'rxjs';
-import {first, take, takeUntil} from 'rxjs/operators';
+import {first, takeUntil} from 'rxjs/operators';
 import {CompetitionService} from '../../services/competition/competition.service';
 import {ParticipantsService} from 'src/app/services/participants/participants.service';
 import {SingleMatch} from 'src/app/interfaces/single-match';
@@ -99,64 +99,67 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
     updateGamblesStatus(match, newStatus): void {
         /* get gambles match */
-        let gamble = [] as Gamble[];
-        let score = 0;
+        let gambles = [] as Gamble[];
         this.gambleService.getGamblesBySingleMatchId(match.id)
-            .pipe(
-                first()
-            )
+            .pipe(first())
             .subscribe(
             res => {
-                gamble = res;
-
-                // tslint:disable-next-line:prefer-for-of
-                for (let i = 0; i < gamble.length; i++) {
-                    /* gamble PRO */
-                    if (gamble[i].penkaFormat === 'PRO') {
-                        // exact result
-                        if ((match.homeTeamScore === gamble[i].homeTeamScore) && (match.visitTeamScore === gamble[i].visitTeamScore)) {
-                            score = 5;
-                        } // draw or winner but not exact result
-                        else if ((match.draw === true && gamble[i].draw) || (match.winnerId === gamble[i].winnerTeamId)) {
-                            score = 3;
-                        } else {
-                            score = 0;
-                        }
-                    }
-                    /* gamble MEDIUM*/
-                    if (gamble[i].penkaFormat === 'MEDIUM') {
-                        if (match.draw === true && gamble[i].draw || match.winnerId === gamble[i].winnerTeamId) {
-                            score = 3;
-                        } else {
-                            score = 0;
-                        }
-                    }
-                    /*************************/
-
+                gambles = res;
+                let score;
+                gambles.forEach(gamble => {
+                    score = this.getGambleScore(gamble, match);
+                
                     if(match.status === '1') {
                         // revert finished gamble
                         score = score * -1;
-                        this.gambleService.updateScoreAchieve(gamble[i].id, 0, match.status);
-
+                        this.gambleService.updateScoreAchieve(gamble.id, 0, match.status);
+    
                     } else {
                         // status 2
-                        this.gambleService.updateScoreAchieve(gamble[i].id, score, match.status);
+                        this.gambleService.updateScoreAchieve(gamble.id, score, match.status);
                     }
-                    this.updateParticipantAccumulatedScore(gamble[i], score, match);
-                }
+                    this.updateParticipantAccumulatedScore(gamble, score, match);
+                });
             });
+    }
+    
+    private getGambleScore(gamble: Gamble, match: SingleMatch ) {
+        /* gamble PRO */
+        let score;
+        if (gamble.penkaFormat === 'PRO') {
+            // exact result
+            if ((match.homeTeamScore === gamble.homeTeamScore) && (match.visitTeamScore === gamble.visitTeamScore)) {
+                score = 5;
+            } // draw or winner but not exact result
+            else if ((match.draw === true && gamble.draw) || (match.winnerId === gamble.winnerTeamId)) {
+                score = 3;
+            } else {
+                score = 0;
+            }
+        }
+        /* gamble MEDIUM*/
+        if (gamble.penkaFormat === 'MEDIUM') {
+            if (match.draw === true && gamble.draw || match.winnerId === gamble.winnerTeamId) {
+                score = 3;
+            } else {
+                score = 0;
+            }
+        }
+        return score;
+        /*************************/
     }
 
     private updateParticipantAccumulatedScore(gamble: Gamble, score: number, match): void {
             // add gamble score to participant accumulatedScore 
             this.participantsService.getParticipantByGamble(gamble.userId, gamble.codePenka).pipe(first()).subscribe( 
                 (participant: Participant[]) => {
-                  let newScore =  participant[0].accumulatedScore + score;
-                  this.participantsService.updateScore(participant[0].id, newScore);
-            
+                  if(participant.length > 0) {
+                      let newScore =  participant[0].accumulatedScore + score;
+                      this.participantsService.updateScore(participant[0].id, newScore);
+                  }
                   // una vez finalizado el computo de puntajes, calculo los ganadores
                   this.updatePenkasStatus(match);
-            })  
+                });  
     }
 
     updateTeamsScores(id, homeTeamScore: number, visitTeamScore: number): void {

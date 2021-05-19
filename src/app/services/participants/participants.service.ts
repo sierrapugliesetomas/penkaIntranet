@@ -42,10 +42,10 @@ export class ParticipantsService {
 
     getParticipantByGamble(userId, codePenka): any {
         return this.afs.collection<Participant>('participants', ref => ref.where('userId', '==', userId)
-            .where('codePenka', '==', codePenka)).snapshotChanges().pipe(
-            map(actions => actions.map(a => {
-                const data = a.payload.doc.data() as Participant;
-                const id = a.payload.doc.id;
+            .where('codePenka', '==', codePenka)).get().pipe(
+            map(actions => actions.docs.map(a => {
+                const data = a.data() as Participant;
+                const id = a.id;
                 return {id, ...data};
             }))
         );

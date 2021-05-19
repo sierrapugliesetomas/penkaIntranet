@@ -41,10 +41,10 @@ export class GambleService {
     // tslint:disable-next-line:typedef
     getGamblesBySingleMatchId(singleMatchId) {
         return this.afs.collection<Gamble>('gambles', ref => ref.where('singleMatchId', '==', singleMatchId))
-            .snapshotChanges().pipe(
-                map(actions => actions.map(a => {
-                    const data = a.payload.doc.data() as Gamble;
-                    const id = a.payload.doc.id;
+            .get().pipe(
+                map(actions => actions.docs.map(a => {
+                    const data = a.data() as Gamble;
+                    const id = a.id;
                     return {id, ...data};
                 }))
             );
