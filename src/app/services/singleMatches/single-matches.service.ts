@@ -92,7 +92,7 @@ export class SingleMatchesService {
     }
 
     updateAllTeamsScores(match: SingleMatch) {
-        this.singleMatchesCollection.doc(match.id).update({
+       return this.singleMatchesCollection.doc(match.id).update({
             homeTeamScore: match.homeTeamScore,
             visitTeamScore: match.visitTeamScore,
             winnerFlag: match.winnerFlag,

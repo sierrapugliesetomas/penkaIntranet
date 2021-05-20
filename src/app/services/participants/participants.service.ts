@@ -40,7 +40,7 @@ export class ParticipantsService {
             );
     }
 
-    getParticipantByGamble(userId, codePenka): any {
+    getParticipantByGamble(userId, codePenka) {
         return this.afs.collection<Participant>('participants', ref => ref.where('userId', '==', userId)
             .where('codePenka', '==', codePenka)).get().pipe(
             map(actions => actions.docs.map(a => {
@@ -63,6 +63,10 @@ export class ParticipantsService {
                     return {id, ...data};
                 }))
             );
+    }
+
+    update(participant) {
+       return this.participantsCollection.doc(participant.id).update(participant).catch(error => console.log(error));
     }
 
     updateScore(id, accumulatedScore: number): any {

@@ -82,7 +82,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
             if (confirm('Desea confirmar el partido por finalizado?')) {
                 updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
-                this.updateGamblesStatus(updatedMatch, event.value);
+                this.updateGamblesStatus(updatedMatch);
             } else {
                 event.value = match.status; // old value, prevent change select
             }
@@ -90,14 +90,14 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
             if (confirm('Desea publicar nuevamente el partido?')) {
                 updatedMatch.status = event.value;
                 this.singleMatchesService.updateStatus(match.id, event.value);
-                this.updateGamblesStatus(updatedMatch, event.value);
+                this.updateGamblesStatus(updatedMatch);
             } else {
                 event.value = match.status; // old value, prevent change select
             }
         }
     }
 
-    updateGamblesStatus(match, newStatus): void {
+    updateGamblesStatus(match): void {
         /* get gambles match */
         let gambles = [] as Gamble[];
         this.gambleService.getGamblesBySingleMatchId(match.id)
@@ -162,37 +162,91 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 });  
     }
 
-    updateTeamsScores(id, homeTeamScore: number, visitTeamScore: number): void {
+    async updateTeamsScores(id, newHomeTeamScore: number, newVisitTeamScore: number) {
         if (confirm('Desea actualizar resultado del partido?')) {
             let match: SingleMatch = this.singleMatches.find(m => m.id === id);
-            match.homeTeamScore = Number(homeTeamScore);
-            match.visitTeamScore = Number(visitTeamScore);
+            // parse string from select
+            newHomeTeamScore = Number(newHomeTeamScore);
+            newVisitTeamScore = Number(newVisitTeamScore);
             
-            if (match.homeTeamScore !== match.visitTeamScore) {
-                match.winnerId = match.homeTeamScore > match.visitTeamScore ? match.homeTeamId : match.visitTeamId;
-                match.winnerName = match.homeTeamScore > match.visitTeamScore ? match.homeTeamName : match.visitTeamName;
-                match.winnerFlag = match.homeTeamScore > match.visitTeamScore ? match.homeTeamFlag : match.visitTeamFlag;
+            if (match.status === '2') {
+                let relatedGambles = await this.gambleService.getGamblesBySingleMatchId(match.id).toPromise();
+                let participant: Participant[];
+                let newAccumulatedScore: number;
+                await Promise.all(relatedGambles.map(async (gamble) => {
+                    participant = await this.participantsService.getParticipantByGamble(gamble.userId, gamble.codePenka).toPromise();
+                    if (participant.length > 0) {
+                        // restarle el puntaje de la gamble
+                        newAccumulatedScore = participant[0].accumulatedScore - gamble.scoreAchieved;
+                        participant[0].accumulatedScore = newAccumulatedScore;
+                        participant[0].place = '';
+                        await this.participantsService.update(participant[0]);
+                    }
+                    // gamble.scoreAchieved = 0;
+                }));
                 
-                match.loserId = match.homeTeamScore < match.visitTeamScore ? match.homeTeamId : match.visitTeamId;
-                match.loserName = match.homeTeamScore < match.visitTeamScore ? match.homeTeamName : match.visitTeamName;
-                match.loserFlag = match.homeTeamScore < match.visitTeamScore ? match.homeTeamFlag : match.visitTeamFlag;
-                
-                match.draw = false;
+                // setear nuevo ganador/perdedor/empate del partido
+                match.homeTeamScore = newHomeTeamScore;
+                match.visitTeamScore = newVisitTeamScore;
+                await this.setMatchWinnerTeam(match);
 
+                relatedGambles.map(gamble => gamble.scoreAchieved = this.getGambleScore(gamble,match));
+
+                await Promise.all(relatedGambles.map(async gamble => {
+                    this.gambleService.updateScoreAchieve(gamble.id, gamble.scoreAchieved, gamble.status);
+                    participant = await this.participantsService.getParticipantByGamble(gamble.userId, gamble.codePenka).toPromise();
+                    await Promise.all(participant.map(async part => {
+                        part.accumulatedScore;
+                        await this.participantsService.updateScore(part.id, part.accumulatedScore + gamble.scoreAchieved);
+                    }));
+                }));
+
+                this.penkasService.getPenkasBySingleMatchId(match.id).pipe(first()).subscribe(res => {
+                    res.forEach(p => {
+                            this.participantsService.getParticipantByCodePenka(p.codePenka)
+                            .pipe(first())
+                            .subscribe(
+                                res => {
+                                    if(res.length > 0 && res[0].status === '2') {
+                                        this.setWinners(res);
+                                    }
+                            });
+                        });
+                })
             } else {
-                // draw
-                match.winnerId = '';
-                match.winnerFlag = '';
-                match.winnerName = '';
-                
-                match.loserId = '';
-                match.loserFlag = '';
-                match.loserName = '';
-
-                match.draw = true;
+                // partido aun no finalizado
+                match.homeTeamScore = newHomeTeamScore;
+                match.visitTeamScore = newVisitTeamScore;
+                this.setMatchWinnerTeam(match);
             }
-            this.singleMatchesService.updateAllTeamsScores(match);
         }
+    }
+
+    private async setMatchWinnerTeam(match: SingleMatch) {
+        if (match.homeTeamScore !== match.visitTeamScore) {
+            match.winnerId = match.homeTeamScore > match.visitTeamScore ? match.homeTeamId : match.visitTeamId;
+            match.winnerName = match.homeTeamScore > match.visitTeamScore ? match.homeTeamName : match.visitTeamName;
+            match.winnerFlag = match.homeTeamScore > match.visitTeamScore ? match.homeTeamFlag : match.visitTeamFlag;
+            
+            match.loserId = match.homeTeamScore < match.visitTeamScore ? match.homeTeamId : match.visitTeamId;
+            match.loserName = match.homeTeamScore < match.visitTeamScore ? match.homeTeamName : match.visitTeamName;
+            match.loserFlag = match.homeTeamScore < match.visitTeamScore ? match.homeTeamFlag : match.visitTeamFlag;
+            
+            match.draw = false;
+
+        } else {
+            // draw
+            match.winnerId = '';
+            match.winnerFlag = '';
+            match.winnerName = '';
+            
+            match.loserId = '';
+            match.loserFlag = '';
+            match.loserName = '';
+
+            match.draw = true;
+        }
+        await this.singleMatchesService.updateAllTeamsScores(match);
     }
 
     private updatePenkasStatus(match: SingleMatch) {
@@ -250,6 +304,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                     winners.push(actual);
                     this.participantsService.updatePlace(actual.id, places[placesIndex]);
                 }
+                // ToDo: aca podria poner place = ''
             }
         }
     }
