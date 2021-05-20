@@ -171,48 +171,51 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
             
             if (match.status === '2') {
                 let relatedGambles = await this.gambleService.getGamblesBySingleMatchId(match.id).toPromise();
-                let participant: Participant[];
-                let newAccumulatedScore: number;
-                await Promise.all(relatedGambles.map(async (gamble) => {
-                    participant = await this.participantsService.getParticipantByGamble(gamble.userId, gamble.codePenka).toPromise();
-                    if (participant.length > 0) {
-                        // restarle el puntaje de la gamble
-                        newAccumulatedScore = participant[0].accumulatedScore - gamble.scoreAchieved;
-                        participant[0].accumulatedScore = newAccumulatedScore;
-                        participant[0].place = '';
-                        await this.participantsService.update(participant[0]);
-                    }
-                    // gamble.scoreAchieved = 0;
-                }));
+                let relatedPenkasIds = [...new Set(relatedGambles.map(gamble => gamble.codePenka))];
+                let relatedParticipant =  await this.participantsService.getAllParticipantsOnce().toPromise();
+                console.log(relatedParticipant.length);
+                relatedParticipant = relatedParticipant.filter(part => relatedPenkasIds.includes(part.codePenka));
+                console.log(relatedParticipant.length);
                 
+
+                let oldAccumulatedScore: number;
+              
+                relatedGambles.forEach((gamble: Gamble) => {
+                    let indexToUpdate = relatedParticipant.findIndex(p => p.userId === gamble.userId && p.codePenka === gamble.codePenka);
+                    if(indexToUpdate !== -1) {
+                        oldAccumulatedScore = relatedParticipant[indexToUpdate].accumulatedScore - gamble.scoreAchieved;
+                        relatedParticipant[indexToUpdate].accumulatedScore = oldAccumulatedScore;
+                        relatedParticipant[indexToUpdate].place = '';
+                    }
+                });
+              
                 // setear nuevo ganador/perdedor/empate del partido
                 match.homeTeamScore = newHomeTeamScore;
                 match.visitTeamScore = newVisitTeamScore;
-                await this.setMatchWinnerTeam(match);
+                match = this.setMatchWinnerTeam(match);
 
-                relatedGambles.map(gamble => gamble.scoreAchieved = this.getGambleScore(gamble,match));
-
-                await Promise.all(relatedGambles.map(async gamble => {
-                    this.gambleService.updateScoreAchieve(gamble.id, gamble.scoreAchieved, gamble.status);
-                    participant = await this.participantsService.getParticipantByGamble(gamble.userId, gamble.codePenka).toPromise();
-                    await Promise.all(participant.map(async part => {
-                        part.accumulatedScore;
-                        await this.participantsService.updateScore(part.id, part.accumulatedScore + gamble.scoreAchieved);
-                    }));
-                }));
-
-                this.penkasService.getPenkasBySingleMatchId(match.id).pipe(first()).subscribe(res => {
-                    res.forEach(p => {
-                            this.participantsService.getParticipantByCodePenka(p.codePenka)
-                            .pipe(first())
-                            .subscribe(
-                                res => {
-                                    if(res.length > 0 && res[0].status === '2') {
-                                        this.setWinners(res);
-                                    }
-                            });
+                // update nuevo puntaje en gambles
+                relatedGambles.forEach(gamble => {
+                    gamble.scoreAchieved = this.getGambleScore(gamble,match);
+                    let updateIndex = relatedParticipant.findIndex(p => p.userId === gamble.userId && p.codePenka === gamble.codePenka);
+                    if(updateIndex !== -1) {
+                        relatedParticipant[updateIndex].accumulatedScore = relatedParticipant[updateIndex].accumulatedScore + gamble.scoreAchieved; 
+                        console.log('aaaa');
+                        this.gambleService.update(gamble);
+                        this.participantsService.update(relatedParticipant[updateIndex]);
+                    }
+                });
+                
+                relatedPenkasIds.forEach( codePenka => {
+                    this.participantsService.getParticipantByCodePenka(codePenka)
+                        .pipe(first())
+                        .subscribe(
+                            participantList => {
+                                if(participantList.length > 0 && participantList[0].status === '2') {
+                                    this.setWinners(participantList);
+                            }
                         });
-                })
+                    });
             } else {
                 // partido aun no finalizado
                 match.homeTeamScore = newHomeTeamScore;
@@ -222,7 +225,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
         }
     }
 
-    private async setMatchWinnerTeam(match: SingleMatch) {
+    private setMatchWinnerTeam(match: SingleMatch) {
         if (match.homeTeamScore !== match.visitTeamScore) {
             match.winnerId = match.homeTeamScore > match.visitTeamScore ? match.homeTeamId : match.visitTeamId;
             match.winnerName = match.homeTeamScore > match.visitTeamScore ? match.homeTeamName : match.visitTeamName;
@@ -246,7 +249,10 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
 
             match.draw = true;
         }
-        await this.singleMatchesService.updateAllTeamsScores(match);
+        this.singleMatchesService.updateAllTeamsScores(match);
+        
+        return match;
+        // ToDo: aca puede retornar el partido actualizado en vez de tener que esperar el await
     }
 
     private updatePenkasStatus(match: SingleMatch) {

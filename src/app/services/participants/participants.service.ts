@@ -29,6 +29,20 @@ export class ParticipantsService {
         return this.participants;
     }
 
+    getAllParticipantsOnce() {
+        return this.afs.collection<Participant>('participants')
+            .get().pipe(
+                map(actions => actions.docs.map(a => {
+                    const data = a.data() as Participant;
+                    const id = a.id;
+                    console.log(data);
+                    
+                    return {id, ...data};
+                })
+            )
+        );    
+    }
+
     getParticipantByUserId(userId) {
         return this.afs.collection<Participant>('participants', ref => ref.where('userId', '==', userId))
             .snapshotChanges().pipe(

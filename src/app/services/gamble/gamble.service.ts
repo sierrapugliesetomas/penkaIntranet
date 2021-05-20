@@ -60,6 +60,10 @@ export class GambleService {
         this.gambleCollection.doc(id).update({status}).then();
     }
 
+    update(gamble) {
+        return this.gambleCollection.doc(gamble.id).update(gamble).catch(error => console.log(error));
+     }
+
     addGamble(gamble: Gamble) {
         this.gambleCollection.add(gamble).catch(error => console.log(error));
     }
