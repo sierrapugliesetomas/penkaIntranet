@@ -61,6 +61,21 @@ export class SingleMatchesService {
         );
     }
 
+    getSingleMatchesByIdArray(singleMatchesIds: string[], status = '1') {
+            return this.afs.collection<SingleMatch>('singleMatches', ref => ref
+            .where('id', 'array-contains', singleMatchesIds)
+            .where('status', '==', status)
+            .orderBy('startDate', 'desc')).snapshotChanges().pipe(
+                map(actions => actions.map(a => {
+                    const data = a.payload.doc.data() as SingleMatch;
+                    const id = a.payload.doc.id;
+                    return {id, ...data};
+                })
+            )
+        );
+    }
+        
+
     addMatch(singleMatch: SingleMatch) {
         this.singleMatchesCollection.add(singleMatch)
             .catch(error => console.log(error));

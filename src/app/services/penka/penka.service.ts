@@ -61,10 +61,10 @@ export class PenkaService {
         );
     }
 
-    getPenkasByCodeTemplate(codeTemplate): any {
+    getPenkasByCodeTemplate(codeTemplate) {
         return this.afs.collection<Penka>('penkas', ref => ref
             .where('codeTemplate', '==', codeTemplate)
-            .where('status', '==', '1')
+            .where('status', 'in', ['1','2'])
             .orderBy('dateLimit', 'asc'))
             .snapshotChanges().pipe(map(actions => actions.map(a => {
                     const data = a.payload.doc.data() as Penka;

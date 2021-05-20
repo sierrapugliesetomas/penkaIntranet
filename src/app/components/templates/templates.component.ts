@@ -7,9 +7,14 @@ import {FirebaseApp} from '@angular/fire';
 import {Router} from '@angular/router';
 import {User} from '../../interfaces/user';
 import {Subject} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
+import {first, takeUntil} from 'rxjs/operators';
 import {Templates} from '../../interfaces/templates';
 import {ListMatches} from '../../interfaces/list-matches';
+import { SingleMatch } from 'src/app/interfaces/single-match';
+import { PenkaService } from 'src/app/services/penka/penka.service';
+import { ParticipantsService } from 'src/app/services/participants/participants.service';
+import { Penka } from 'src/app/interfaces/penka';
+import { Participant } from 'src/app/interfaces/participant';
 
 @Component({
     selector: 'app-templates',
@@ -24,6 +29,8 @@ export class TemplatesComponent implements OnInit, OnDestroy {
 
     user = {} as User;
     listMatches = [] as ListMatches[];
+
+    singleMatches = {} as SingleMatch[];
 
     private unsubscribe$ = new Subject<void>();
 
@@ -42,7 +49,9 @@ export class TemplatesComponent implements OnInit, OnDestroy {
         private router: Router,
         private templatesService: TemplatesService,
         private singleMatchesService: SingleMatchesService,
-        private listMatchesService: ListMatchesService) {
+        private listMatchesService: ListMatchesService,
+        private penkaService: PenkaService,
+        private participantService: ParticipantsService) {
 
         if (this.today.getDate() < 10) {
             this.day = '0' + this.today.getDate();
@@ -88,6 +97,16 @@ export class TemplatesComponent implements OnInit, OnDestroy {
                 res => {
                     this.listMatches = res;
                 });
+        
+        this.singleMatchesService.getSingleMatchesPublishByStatus('1')
+        .pipe(
+            takeUntil(this.unsubscribe$)
+        )
+        .subscribe(
+            res => {
+                this.singleMatches = res;
+            });
+    
     }
 
     ngOnDestroy(): void {
@@ -95,7 +114,7 @@ export class TemplatesComponent implements OnInit, OnDestroy {
         this.unsubscribe$.complete();
     }
 
-    showMatches(codeTemplate) {
+    showMatches(codeTemplate):void {
         this.codeTemplate = codeTemplate;
     }
 
@@ -119,5 +138,62 @@ export class TemplatesComponent implements OnInit, OnDestroy {
 
     goToEdit(codeTemplate): void {
         this.router.navigate(['templates/edit/' + codeTemplate])
+    }
+
+    async finnishTemplate(codeTemplate: string) {
+        if (!this.hasOpenMatches(codeTemplate)) {
+            if (confirm('Esta seguro que desea finalizar el Template?')) {
+                this.penkaService.getPenkasByCodeTemplate(codeTemplate).pipe(first()).subscribe((relatedPenkas: Penka[]) => {
+                    relatedPenkas.forEach(penka => {
+                        this.penkaService.updateStatus(penka.id, '2');
+                        this.updatePenkaParticipations(penka)
+                    });
+                });
+            }
+
+        } else {
+            alert('Este template aún tiene partidos por jugar');
+        }
+            
+    }
+
+    private hasOpenMatches(codeTemplate: string): boolean {
+        const relatedSingleMatchesIds = this.listMatches.filter(match => match.codeTemplate === codeTemplate).map(match => match.singleMatchId);
+        const openMatch = this.singleMatches.find(match => relatedSingleMatchesIds.includes(match.id));
+        
+        return openMatch !== undefined;
+    }
+
+    private updatePenkaParticipations(penka: Penka): void {
+        this.participantService.getParticipantByCodePenka(penka.codePenka)
+        .pipe(first())
+        .subscribe((participants: Participant[]) => {
+            this.setWinners(participants);
+        });
+    }
+
+    private setWinners(participants: Participant[]) {
+        let winners = [];
+        const places = ['primero', 'segundo', 'tercero'];
+        let placesIndex = 0;
+        let previousScore = 0;
+        
+        for (let index = 0; (index < participants.length && placesIndex < 3); index++) {
+            let actual = participants[index];
+
+            if (previousScore === 0 || previousScore === actual.accumulatedScore ) {
+                this.participantService.updatePlace(actual.id, places[placesIndex]);
+                previousScore = actual.accumulatedScore;
+                winners.push(actual);
+
+            } else {
+                if(winners.length < 3) {
+                    placesIndex++;
+                    previousScore = actual.accumulatedScore;
+                    winners.push(actual);
+                    this.participantService.updatePlace(actual.id, places[placesIndex]);
+                }
+            }
+        }
     }
 }
