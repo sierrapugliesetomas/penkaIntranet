@@ -168,6 +168,7 @@ export class TemplatesComponent implements OnInit, OnDestroy {
         this.participantService.getParticipantByCodePenka(penka.codePenka)
         .pipe(first())
         .subscribe((participants: Participant[]) => {
+            participants.forEach(p => this.participantService.updateStatus(p.id, '2'));
             this.setWinners(participants);
         });
     }
