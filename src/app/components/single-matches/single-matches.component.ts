@@ -304,7 +304,6 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                     winners.push(actual);
                     this.participantsService.updatePlace(actual.id, places[placesIndex]);
                 }
-                // ToDo: aca podria poner place = ''
             }
         }
     }
