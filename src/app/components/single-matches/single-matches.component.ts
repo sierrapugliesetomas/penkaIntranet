@@ -173,10 +173,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 let relatedGambles = await this.gambleService.getGamblesBySingleMatchId(match.id).toPromise();
                 let relatedPenkasIds = [...new Set(relatedGambles.map(gamble => gamble.codePenka))];
                 let relatedParticipant =  await this.participantsService.getAllParticipantsOnce().toPromise();
-                console.log(relatedParticipant.length);
                 relatedParticipant = relatedParticipant.filter(part => relatedPenkasIds.includes(part.codePenka));
-                console.log(relatedParticipant.length);
-                
 
                 let oldAccumulatedScore: number;
               

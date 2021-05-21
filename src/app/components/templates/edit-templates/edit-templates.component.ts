@@ -1,10 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FirebaseApp } from '@angular/fire';
 import { AbstractControl, FormBuilder, FormGroup } from '@angular/forms';
-import { ActivatedRoute, Params, Router } from '@angular/router';
+import { ActivatedRoute, Params } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { Gamble } from 'src/app/interfaces/gamble';
+import { Participant } from 'src/app/interfaces/participant';
+import { Penka } from 'src/app/interfaces/penka';
 import { SingleMatch } from 'src/app/interfaces/single-match';
 import { Templates } from 'src/app/interfaces/templates';
 import { User } from 'src/app/interfaces/user';
@@ -52,7 +55,8 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
         private formBuilder: FormBuilder,
         private penkaService: PenkaService,
         private participantsService: ParticipantsService,
-        private gambleService: GambleService
+        private gambleService: GambleService,
+        private modalService: NgbModal
         ) {
     }
 
@@ -195,39 +199,40 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
                         status = '1'
                     );
                 this.getPublishSingleMatches();
-                this.addNewGambles(m, codeTemplate);
-
+                this.addNewGambles(m);
                 } else {
                     alert('Es partido ya fue seleccionado');
                 }
-
-
             },
             error => console.log(error));
     }
 
-    private async addNewGambles(match, codeTemplate) {
-        const penkas = await this.penkaService.getPenkasByCodeTemplate(codeTemplate).pipe(first()).toPromise();
-        penkas.forEach(penka => {
-            this.participantsService.getParticipantByCodePenka(penka.codePenka)
-            .pipe(first())
-            .subscribe(res => {
-                res.forEach(part => this.addGamble(match, penka))
-            })
-        });        
+    private async addNewGambles(match) {
+        const relatedPenkas = await this.penkaService.getPenkasByCodeTemplate(this.codeTemplate).toPromise();
+        const relatedPenkasIds = relatedPenkas.map(penka => penka.codePenka);
+
+
+        const allParticipants = await this.participantsService.getAllParticipantsOnce().toPromise();
+        let relatedParticipant = allParticipants.filter(p => relatedPenkasIds.includes(p.codePenka))
+
+        relatedPenkas.forEach(penka => {
+            relatedParticipant.filter(part => part.codePenka === penka.codePenka).forEach(part => this.addGamble(match, penka, part));
+        });
+        
+        this.modalService.dismissAll('Cross click');
     }
 
-    private addGamble(match, penka) {
+    private addGamble(match: SingleMatch, penka: Penka, participant: Participant) {
         let newGamble = {} as Gamble;
         
         // ---------------------------------- //
         newGamble.codePenka = penka.codePenka;
         newGamble.penkaFormat = penka.formatName;
         newGamble.singleMatchId = match.id;
-        newGamble.userId = this.user.uid;
-        newGamble.userName = this.user.displayName;
-        newGamble.userEmail = this.user.email;
-        newGamble.userPhoto = this.user.photoURL;
+        newGamble.userId = participant.userId;
+        newGamble.userName = participant.userName;
+        newGamble.userEmail = participant.userEmail;
+        newGamble.userPhoto = participant.userPhoto;
         newGamble.homeTeamId = match.homeTeamId;
         newGamble.homeTeamName = match.homeTeamName;
         newGamble.homeTeamAlias = match.homeTeamAlias;
@@ -250,16 +255,37 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
         this.gambleService.addGamble(newGamble);
     }
 
-    delete(tm): void {
+    async delete (tm) {
         this.selectedMatchId = '';
         this.listMatchesService.deleteMatch(tm.id);
         this.getPublishSingleMatches();
-        this.deleteMatchGambles(tm.singleMatchId);
+        await this.deleteRelatedMatchGambles(tm.singleMatchId);
+        this.modalService.dismissAll('Cross click');
     }
 
-    private async deleteMatchGambles(singleMatchId) {
-        const relatedGambles = await this.gambleService.getGamblesBySingleMatchId(singleMatchId).pipe(first()).toPromise();
-        relatedGambles.forEach(g => this.gambleService.deleteGamble(g.id));
+    private async deleteRelatedMatchGambles(singleMatchId) {
+        const relatedPenkas = await this.penkaService.getPenkasByCodeTemplate(this.codeTemplate).toPromise();
+        const relatedPenkasIds = relatedPenkas.map(penka => penka.codePenka);
+
+
+        const allParticipants = await this.participantsService.getAllParticipantsOnce().toPromise();
+        let relatedParticipant = allParticipants.filter(p => relatedPenkasIds.includes(p.codePenka))
+
+        const allGambles = await this.gambleService.getGamblesBySingleMatchId(singleMatchId).toPromise();
+        let relatedGambles = allGambles.filter(g => relatedPenkasIds.includes(g.codePenka));
+        
+        let oldAccumulatedScore;
+        relatedGambles.forEach(async (gamble: Gamble) => {
+            let indexToUpdate = relatedParticipant.findIndex(p => p.userId === gamble.userId && p.codePenka === gamble.codePenka);
+            if (indexToUpdate !== -1) {
+                oldAccumulatedScore = relatedParticipant[indexToUpdate].accumulatedScore - gamble.scoreAchieved;
+                relatedParticipant[indexToUpdate].accumulatedScore = oldAccumulatedScore;
+                relatedParticipant[indexToUpdate].place = '';
+            }
+            await this.participantsService.update(relatedParticipant[indexToUpdate]);
+            //ToDo: eliminar o pasar a otro estado y luego al agregar el partido, recuperar?
+            this.gambleService.deleteGamble(gamble.id);
+        });
     }
 
     saveForm(): void {

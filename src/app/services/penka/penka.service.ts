@@ -66,9 +66,11 @@ export class PenkaService {
             .where('codeTemplate', '==', codeTemplate)
             .where('status', 'in', ['1','2'])
             .orderBy('dateLimit', 'asc'))
-            .snapshotChanges().pipe(map(actions => actions.map(a => {
-                    const data = a.payload.doc.data() as Penka;
-                    const id = a.payload.doc.id;
+            .get()
+            .pipe(
+                map(actions => actions.docs.map(a => {
+                    const data = a.data() as Penka;
+                    const id = a.id;
                     return {id, ...data};
                 }))
             );
