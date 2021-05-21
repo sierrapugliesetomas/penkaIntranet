@@ -67,7 +67,10 @@
         <div id="listMatches" class="card-body">
             <ul *ngFor="let m of matches" class="list-group">
                 <li class="list-group-item item mb-2 pt-0 pb-0">
-                    <button (click)="addList($event, m, codeTemplate)" class="btn btn-success btn-sm float-left mt-2"
+                    <button 
+                        [disabled]="selectedMatchId === m.id"
+                        (click)="addList($event, m, codeTemplate)" 
+                        class="btn btn-success btn-sm float-left mt-2"
                         type="button">
                         Seleccionar
                     </button>

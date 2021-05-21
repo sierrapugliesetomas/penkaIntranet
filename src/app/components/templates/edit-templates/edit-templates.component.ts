@@ -35,7 +35,7 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
     user = {} as User;
     clubsAndCountries = [];
     form: FormGroup;
-
+    selectedMatchId = '';
     minDate: { year: number, month: number, day: number };
 
     private unsubscribe$ = new Subject<void>();
@@ -161,6 +161,7 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
     // tslint:disable-next-line:typedef
 
     addList(event, m, codeTemplate): void {
+        this.selectedMatchId = m.id
         /// date
         const today = new Date();
         let match = [];
@@ -250,6 +251,7 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
     }
 
     delete(tm): void {
+        this.selectedMatchId = '';
         this.listMatchesService.deleteMatch(tm.id);
         this.getPublishSingleMatches();
         this.deleteMatchGambles(tm.singleMatchId);

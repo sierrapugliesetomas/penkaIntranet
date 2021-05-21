@@ -8,13 +8,6 @@
                     <ul class="list-group">
                         <li class="list-group-item item mb-2 p-2" *ngFor="let t of templates | filterFiled:false" (click)="showMatches(t.codeTemplate)" type="button">
                             <a type="button">{{t.name}}</a>
-                            <button
-                            (click)="finnishTemplate(t.codeTemplate)"
-                            class="btn btn-primary btn-sm mr-2 ml-2 float-right"
-                            type="button"
-                        >
-                            Finalizar
-                        </button>
                             <div *ngIf="t.publish === false; else disable">
                                 <button
                                     (click)="publish(t.id)"
@@ -49,6 +42,13 @@
                                     Borrar
                                 </button>
                             </ng-template>
+                            <button
+                            (click)="finnishTemplate(t.codeTemplate)"
+                            class="btn btn-primary btn-sm mr-2 float-right"
+                            type="button"
+                        >
+                            Finalizar
+                        </button>
                             <button
                                 (click)="stock(t.id)"
                                 class="btn btn-secondary btn-sm mr-2 float-right"
