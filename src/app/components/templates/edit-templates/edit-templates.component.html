@@ -14,7 +14,8 @@
                             <p class="pt-3 mr-4">{{tm.visitTeamAlias}}</p>
                             <p class="pt-3">{{tm.startDate.toDate() | date:'d/M/yy - HH:mm'}}</p>
                         </div>
-                        <button (click)="delete(tm); modalService.open(modal, { centered: true });" class="btn btn-danger btn-sm float-right mt-2" type="button">
+                        <button (click)="delete(tm); modalService.open(modal, { centered: true });"
+                            class="btn btn-danger btn-sm float-right mt-2" type="button">
                             Quitar
                         </button>
                     </li>
@@ -66,23 +67,30 @@
         <div class="card">
             <h6 class="card-header">Partidos Sueltos</h6>
             <div id="listMatches" class="card-body">
-                <ul *ngFor="let m of matches" class="list-group">
-                    <li class="list-group-item item mb-2 pt-0 pb-0">
-                        <button [disabled]="selectedMatchId === m.id"
-                            (click)="addList($event, m, codeTemplate); modalService.open(modal, { centered: true });"
-                            class="btn btn-success btn-sm float-left mt-2" type="button">
-                            Seleccionar
-                        </button>
-                        <div class="form-inline float-right pt-0">
-                            <p class="mr-2 pt-3">{{m.homeTeamAlias}}</p>
-                            <img alt="" class="mr-3" height="30" src="{{m.homeTeamFlag}}" width="30">
-                            <p class="mr-3 pt-3 font-weight-bold">Vs</p>
-                            <img alt="" class="mr-2" height="30" src="{{m.visitTeamFlag}}" width="30">
-                            <p class="pt-3 mr-4">{{m.visitTeamAlias}}</p>
-                            <p class="pt-3">{{m.startDate.toDate() | date:'d/M/yy - HH:mm'}}</p>
-                        </div>
-                    </li>
-                </ul>
+                <div *ngIf="matches.length > 0; else noPublishedMatches">
+
+                    <ul *ngFor="let m of matches" class="list-group">
+                        <li class="list-group-item item mb-2 pt-0 pb-0">
+                            <button [disabled]="selectedMatchId === m.id"
+                                (click)="addList($event, m, codeTemplate); modalService.open(modal, { centered: true });"
+                                class="btn btn-success btn-sm float-left mt-2" type="button">
+                                Seleccionar
+                            </button>
+                            <div class="form-inline float-right pt-0">
+                                <p class="mr-2 pt-3">{{m.homeTeamAlias}}</p>
+                                <img alt="" class="mr-3" height="30" src="{{m.homeTeamFlag}}" width="30">
+                                <p class="mr-3 pt-3 font-weight-bold">Vs</p>
+                                <img alt="" class="mr-2" height="30" src="{{m.visitTeamFlag}}" width="30">
+                                <p class="pt-3 mr-4">{{m.visitTeamAlias}}</p>
+                                <p class="pt-3">{{m.startDate.toDate() | date:'d/M/yy - HH:mm'}}</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <ng-template #noPublishedMatches>
+                    Aún no hay partidos publicados
+                </ng-template>
             </div>
         </div>
     </div>
