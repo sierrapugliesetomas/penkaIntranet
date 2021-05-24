@@ -35,8 +35,6 @@ export class ParticipantsService {
                 map(actions => actions.docs.map(a => {
                     const data = a.data() as Participant;
                     const id = a.id;
-                    console.log(data);
-                    
                     return {id, ...data};
                 })
             )
