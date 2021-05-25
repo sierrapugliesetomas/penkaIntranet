@@ -79,7 +79,7 @@ export class ListMatchesService {
         );
     }
 
-    addMatch(singleMatchId, codePenka, codeTemplate, userId, userName, userEmail, userPhoto, date, homeTeamId, homeTeamName, homeTeamAlias, homeTeamFlag, visitTeamId, visitTeamName, visitTeamAlias, visitTeamFlag, startDate, limitDate, status) {
+    addMatch(singleMatchId, codePenka, codeTemplate, userId, userName, userEmail, userPhoto, date, competition, homeTeamId, homeTeamName, homeTeamAlias, homeTeamFlag, visitTeamId, visitTeamName, visitTeamAlias, visitTeamFlag, startDate, limitDate, status) {
         this.listMatchesCollection.add({
             singleMatchId,
             codePenka,
@@ -89,6 +89,7 @@ export class ListMatchesService {
             userEmail,
             userPhoto,
             date,
+            competition,
             homeTeamId,
             homeTeamName,
             homeTeamAlias,

@@ -186,6 +186,7 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
                         this.user.email,
                         this.user.photoURL,
                         today,
+                        m.competition,
                         m.homeTeamId,
                         m.homeTeamName,
                         m.homeTeamAlias,

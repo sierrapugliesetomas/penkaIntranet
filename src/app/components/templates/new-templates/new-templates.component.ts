@@ -171,6 +171,7 @@ export class NewTemplatesComponent implements OnInit {
                         this.user.email,
                         this.user.photoURL,
                         today,
+                        m.competition,
                         m.homeTeamId,
                         m.homeTeamName,
                         m.homeTeamAlias,
