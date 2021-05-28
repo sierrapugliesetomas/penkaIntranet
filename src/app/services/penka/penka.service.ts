@@ -52,10 +52,11 @@ export class PenkaService {
     getPenkasBySingleMatchId(singleMatchId) {
         return this.afs.collection<Penka>('penkas', ref => ref
         .where('status', 'in', ['1','2','9'])
-        .where('singleMatchesId', 'array-contains', singleMatchId)).snapshotChanges().pipe(
-            map(actions => actions.map(a => {
-                const data = a.payload.doc.data() as Penka;
-                const id = a.payload.doc.id;
+        .where('singleMatchesId', 'array-contains', singleMatchId))
+        .get().pipe(
+            map(actions => actions.docs.map(a => {
+                const data = a.data() as Penka;
+                const id = a.id;
                 return {id, ...data};
             }))
         );

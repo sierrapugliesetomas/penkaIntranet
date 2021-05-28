@@ -68,13 +68,15 @@ export class ParticipantsService {
             .where('codePenka', '==', codePenka)
             // .where('status', 'in', ['1', '2', '9'])
             .orderBy('accumulatedScore', 'desc'))
-            .snapshotChanges()
-            .pipe(map(actions => actions.map(a => {
-                    const data = a.payload.doc.data() as Participant;
-                    const id = a.payload.doc.id;
+            .get()
+            .pipe(
+                map(actions => actions.docs.map(a => {
+                    const data = a.data() as Participant;
+                    const id = a.id;
                     return {id, ...data};
-                }))
-            );
+                })
+            )
+        );
     }
 
     update(participant) {
