@@ -37,8 +37,7 @@ export class SingleMatchesService {
     getSingleMatchesByStatus(status = '1') {
         return this.afs.collection<SingleMatch>('singleMatches', ref => ref
         .where('status', '==', status)
-        .orderBy('startDate', 'desc')
-        .limit(35)).snapshotChanges().pipe(
+        .orderBy('startDate', 'desc')).snapshotChanges().pipe(
             map(actions => actions.map(a => {
                 const data = a.payload.doc.data() as SingleMatch;
                 const id = a.payload.doc.id;
