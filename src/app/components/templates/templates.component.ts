@@ -15,6 +15,8 @@ import { PenkaService } from 'src/app/services/penka/penka.service';
 import { ParticipantsService } from 'src/app/services/participants/participants.service';
 import { Penka } from 'src/app/interfaces/penka';
 import { Participant } from 'src/app/interfaces/participant';
+import { PenkaRequest } from 'src/app/interfaces/penka-request';
+import { NotificationService } from 'src/app/services/notification/notification.service';
 
 @Component({
     selector: 'app-templates',
@@ -51,7 +53,8 @@ export class TemplatesComponent implements OnInit, OnDestroy {
         private singleMatchesService: SingleMatchesService,
         private listMatchesService: ListMatchesService,
         private penkaService: PenkaService,
-        private participantService: ParticipantsService) {
+        private participantService: ParticipantsService,
+        private notificationService: NotificationService) {
 
         if (this.today.getDate() < 10) {
             this.day = '0' + this.today.getDate();
@@ -168,7 +171,11 @@ export class TemplatesComponent implements OnInit, OnDestroy {
         this.participantService.getParticipantByCodePenka(penka.codePenka)
         .pipe(first())
         .subscribe((participants: Participant[]) => {
-            participants.forEach(p => this.participantService.updateStatus(p.id, '2'));
+            participants.forEach(p => {
+                this.participantService.updateStatus(p.id, '2')
+                this.participantService.updateFinishDate(p.id, new Date());
+                this.penkaFinishUserNotification(p, penka);
+            });
             this.setWinners(participants);
         });
     }
@@ -196,5 +203,27 @@ export class TemplatesComponent implements OnInit, OnDestroy {
                 }
             }
         }
+    }
+
+    private penkaFinishUserNotification(
+        participant: Participant,
+        penka: Penka
+    ): void {
+        let notification: PenkaRequest = {};
+        notification.codePenka = penka.codePenka;
+        notification.penkaName = penka.name;
+        notification.makerId = penka.makerId;
+        notification.makerName = penka.makerName;
+        notification.makerEmail = penka.makerEmail;
+        notification.makerPhoto = penka.makerPhoto;
+        notification.userId = participant.userId;
+        notification.userName = participant.userName;
+        notification.userEmail = participant.userEmail;
+        notification.userPhoto = participant.userPhoto;
+        notification.message = '';
+        notification.date = new Date();
+        notification.status = '10';
+        notification.timesShow = 0;
+        this.notificationService.addNotification(notification);
     }
 }

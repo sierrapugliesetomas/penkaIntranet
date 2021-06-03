@@ -345,15 +345,16 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
         });
     }
 
-    private async updateParticipationStatus(p, match) {
+    private async updateParticipationStatus(penka: Penka, match) {
         let participants = await this.participantsService
-            .getParticipantByCodePenka(p.codePenka)
+            .getParticipantByCodePenka(penka.codePenka)
             .toPromise();
 
         participants.forEach((participant) => {
             this.participantsService.updateStatus(participant.id, match.status);
-            if (match.status === '2') {
-                this.penkaFinishUserNotification(participant, p);
+            if (match.status === '2' && (penka.codeTemplate === '' || penka.codeTemplate === undefined)){
+                this.participantsService.updateFinishDate(participant.id, new Date());
+                this.penkaFinishUserNotification(participant, penka);
             }
         });
 
@@ -364,7 +365,7 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
                 this.participantsService.updatePlace(p.id, '')
             );
         }
-        this.penkasService.updateStatus(p.id, match.status);
+        this.penkasService.updateStatus(penka.id, match.status);
     }
 
     private setWinners(participants: Participant[]) {
