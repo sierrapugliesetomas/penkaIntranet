@@ -22,4 +22,5 @@ export interface PenkaRequest {
     8 - accepted request
     9 - rejected request
     10 - penka finnished
+    11 - penka template added match
 */

@@ -8,6 +8,7 @@ import { first, takeUntil } from 'rxjs/operators';
 import { Gamble } from 'src/app/interfaces/gamble';
 import { Participant } from 'src/app/interfaces/participant';
 import { Penka } from 'src/app/interfaces/penka';
+import { PenkaRequest } from 'src/app/interfaces/penka-request';
 import { SingleMatch } from 'src/app/interfaces/single-match';
 import { Templates } from 'src/app/interfaces/templates';
 import { User } from 'src/app/interfaces/user';
@@ -16,6 +17,7 @@ import { ClubsService } from 'src/app/services/club/clubs.service';
 import { CountriesService } from 'src/app/services/country/countries.service';
 import { GambleService } from 'src/app/services/gamble/gamble.service';
 import { ListMatchesService } from 'src/app/services/listMatches/list-matches.service';
+import { NotificationService } from 'src/app/services/notification/notification.service';
 import { ParticipantsService } from 'src/app/services/participants/participants.service';
 import { PenkaService } from 'src/app/services/penka/penka.service';
 import { SingleMatchesService } from 'src/app/services/singleMatches/single-matches.service';
@@ -56,7 +58,8 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
         private penkaService: PenkaService,
         private participantsService: ParticipantsService,
         private gambleService: GambleService,
-        private modalService: NgbModal
+        private modalService: NgbModal,
+        private notificationService: NotificationService
         ) {
     }
 
@@ -217,7 +220,12 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
         let relatedParticipant = allParticipants.filter(p => relatedPenkasIds.includes(p.codePenka))
 
         relatedPenkas.forEach(penka => {
-            relatedParticipant.filter(part => part.codePenka === penka.codePenka).forEach(part => this.addGamble(match, penka, part));
+            relatedParticipant.filter(part => part.codePenka === penka.codePenka).forEach(part => {
+                
+                this.addGamble(match, penka, part)
+                this.newMatchAddedNotification(part, penka);
+            });
+            
         });
         
         this.modalService.dismissAll('Cross click');
@@ -254,6 +262,28 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
         newGamble.limitDate = match.limitDate;  
         // ---------------------------------- //
         this.gambleService.addGamble(newGamble);
+    }
+
+    private newMatchAddedNotification(
+        participant: Participant,
+        penka: Penka
+    ): void {
+        let notification: PenkaRequest = {};
+        notification.codePenka = penka.codePenka;
+        notification.penkaName = penka.name;
+        notification.makerId = penka.makerId;
+        notification.makerName = penka.makerName;
+        notification.makerEmail = penka.makerEmail;
+        notification.makerPhoto = penka.makerPhoto;
+        notification.userId = participant.userId;
+        notification.userName = participant.userName;
+        notification.userEmail = participant.userEmail;
+        notification.userPhoto = participant.userPhoto;
+        notification.message = '';
+        notification.date = new Date();
+        notification.status = '11';
+        notification.timesShow = 0;
+        this.notificationService.addNotification(notification);
     }
 
     async delete (tm) {
