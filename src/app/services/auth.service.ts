@@ -1,11 +1,12 @@
-import {Injectable} from '@angular/core';
-import {Router} from '@angular/router';
-import {AngularFireAuth} from '@angular/fire/auth';
-import {AngularFirestore, AngularFirestoreDocument} from '@angular/fire/firestore';
-import {Observable, of} from 'rxjs';
-import {switchMap} from 'rxjs/operators';
-import {User} from '../interfaces/user';
+import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { AngularFireAuth } from '@angular/fire/auth';
+import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firestore';
+import { Observable, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { User } from '../interfaces/user';
 import firebase from 'firebase';
+import { allowedEmails } from '../security/allowed-email-list';
 import auth = firebase.auth;
 
 @Injectable({
@@ -34,7 +35,11 @@ export class AuthService {
   async googleSignin() {
     const provider = new auth.GoogleAuthProvider();
     const credential = await this.afAuth.signInWithPopup(provider);
-    return this.updateUserData(credential.user);
+    if (this.isAllowedEmail(credential.user.email)) { // ToDo: Provisorio
+      return this.updateUserData(credential.user);
+    } else {
+      this.afAuth.signOut();
+    }
   }
 
   async signOut() {
@@ -42,7 +47,7 @@ export class AuthService {
     this.router.navigate(['/']).then();
   }
 
-  private updateUserData({uid, email, displayName, photoURL}: User) {
+  private updateUserData({ uid, email, displayName, photoURL }: User) {
     const userRef: AngularFirestoreDocument<User> = this.afs.doc(`users/${uid}`);
 
     const data = {
@@ -52,8 +57,11 @@ export class AuthService {
       photoURL
     };
 
-    return userRef.set(data, {merge: true});
+    return userRef.set(data, { merge: true });
   }
 
+  private isAllowedEmail(email: string): boolean {
+    return allowedEmails.includes(email);
+  }
 
 }
