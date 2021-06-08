@@ -5,8 +5,8 @@ export const allowedEmails = [
     'tomaspenka2021@gmail.com',
     'nicolas.milieris@bluevine.com',
     'sierrapugliesetomas@gmail.com',
-    'anthony.o@rocksolidaffiliates.com',
+    'anthony.oper@gmail.com',
     'elifalkon@gmail.com',
     'pruebapenka@gmail.com',
-    'penkadrive@gmail.com'
+    'penkadrive@gmail.com',
 ];
