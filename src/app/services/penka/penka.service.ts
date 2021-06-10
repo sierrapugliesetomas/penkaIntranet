@@ -78,6 +78,16 @@ export class PenkaService {
     }
 
     updateStatus(id, status) {
-        this.penkasCollection.doc(id).update({status}).catch(error => console.log(error));
+        if (status === '2') {
+            const finishDate = new Date();
+            this.penkasCollection.doc(id).update({status, finishDate}).catch(error => console.log(error));
+        }
+        else  {
+            this.penkasCollection.doc(id).update({status}).catch(error => console.log(error));
+        }
+    }
+
+    updateFinishDate(id: string, finishDate: Date): void {
+        this.penkasCollection.doc(id).update({finishDate}).catch();
     }
 }

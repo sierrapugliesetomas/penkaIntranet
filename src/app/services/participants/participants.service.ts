@@ -87,8 +87,14 @@ export class ParticipantsService {
         this.participantsCollection.doc(id).update({accumulatedScore}).catch(error => console.log(error));
     }
 
-    updateStatus(id, status): any {
-        this.participantsCollection.doc(id).update({status}).catch();
+    updateStatus(id, status) {
+        if (status === '2') {
+            const finishDate = new Date();
+            this.participantsCollection.doc(id).update({status, finishDate}).catch(error => console.log(error));
+        }
+        else  {
+            this.participantsCollection.doc(id).update({status}).catch(error => console.log(error));
+        }
     }
 
     updatePlace(id, place): void {

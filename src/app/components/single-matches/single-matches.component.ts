@@ -353,7 +353,6 @@ export class SingleMatchesComponent implements OnInit, OnDestroy {
         participants.forEach((participant) => {
             this.participantsService.updateStatus(participant.id, match.status);
             if (match.status === '2' && (penka.codeTemplate === '' || penka.codeTemplate === undefined)){
-                this.participantsService.updateFinishDate(participant.id, new Date());
                 this.penkaFinishUserNotification(participant, penka);
             }
         });

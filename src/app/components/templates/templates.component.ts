@@ -173,7 +173,6 @@ export class TemplatesComponent implements OnInit, OnDestroy {
         .subscribe((participants: Participant[]) => {
             participants.forEach(p => {
                 this.participantService.updateStatus(p.id, '2')
-                this.participantService.updateFinishDate(p.id, new Date());
                 this.penkaFinishUserNotification(p, penka);
             });
             this.setWinners(participants);
