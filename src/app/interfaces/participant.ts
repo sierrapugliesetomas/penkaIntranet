@@ -12,4 +12,5 @@ export interface Participant {
     date?: Date;
     status?: string;
     place?: string;
+    finishDate: Date;
 }

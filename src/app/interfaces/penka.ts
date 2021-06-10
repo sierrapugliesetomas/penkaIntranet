@@ -28,4 +28,5 @@ export interface Penka {
     codeTournament: string;
     tournamentId : string;
     tournamentName : string;
+    finishDate: Date;
 }
