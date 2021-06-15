@@ -176,7 +176,7 @@ export class NewSingleMatchComponent implements OnInit {
         const startDate = new Date(startTime);
 
         const limitDate = new Date()
-        limitDate.setTime(startDate.getTime() - 1800000); // 30 min in milisec
+        limitDate.setTime(startDate.getTime() - 900000); // 15 min in milisec
 
 
         if (this.newSingleMatch.homeTeamId && this.newSingleMatch.visitTeamId) {
