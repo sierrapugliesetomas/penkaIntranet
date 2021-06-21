@@ -41,10 +41,9 @@ export class ListMatchesService {
     }
 
     getListMatchesByCodeTemplate(codeTemplate): any {
-        // ToDo: revisar por que devuelve vacio
         return this.afs.collection<ListMatches>('listMatches', ref => ref
             .where('codeTemplate', '==', codeTemplate)
-            .where('status', '==', '1')
+            .where('status', 'in', ['1', '2'])
             .orderBy('startDate', 'asc')
             )
             .snapshotChanges().pipe(

@@ -14,8 +14,7 @@
                             <p class="pt-3 mr-4">{{tm.visitTeamAlias}}</p>
                             <p class="pt-3">{{tm.startDate.toDate() | date:'d/M/yy - HH:mm'}}</p>
                         </div>
-                        <button (click)="delete(tm); modalService.open(modal, { centered: true });"
-                            class="btn btn-danger btn-sm float-right mt-2" type="button">
+                        <button (click)="openModal(modal, { centered: true }); delete(tm);" class="btn btn-danger btn-sm float-right mt-2" type="button">
                             Quitar
                         </button>
                     </li>
@@ -28,8 +27,7 @@
                             <p>MVP</p>
                         </div>
                         <div class="col-8">
-                            <input class="form-control" id="mvp" name="mvp" placeholder="MVP" type="text"
-                                formControlName="mvp" value="{{template.mvp}}">
+                            <input class="form-control" id="mvp" name="mvp" placeholder="MVP" type="text" formControlName="mvp" value="{{template.mvp}}">
                         </div>
                     </div>
 
@@ -38,8 +36,7 @@
                             <p>Goleador</p>
                         </div>
                         <div class="col-8">
-                            <input class="form-control" id="maximumScorer" name="goleador" placeholder="Goleador"
-                                type="text" formControlName="maximumScorer" value="{{template.maximumScorer}}">
+                            <input class="form-control" id="maximumScorer" name="goleador" placeholder="Goleador" type="text" formControlName="maximumScorer" value="{{template.maximumScorer}}">
                         </div>
                     </div>
 
@@ -49,15 +46,14 @@
                             <p>Campeón </p>
                         </div>
                         <div class="col-8">
-                            <select formControlName="champion" id="champion" class="form-control"
-                                value="{{template.championId}}">
-                                <option *ngFor="let c of clubsAndCountries" value="{{c.id}}">{{c.name}}</option>
+                            <select formControlName="champion" id="champion" class="form-control">
+                                <option *ngFor="let c of clubsAndCountries" value="{{c.id}}" selected="c.id === template.championId">{{c.name}}</option>
                             </select>
                         </div>
                     </div>
                 </form>
                 <br>
-                <button class="btn btn-primary btn-block" (click)="saveForm()">
+                <button class="btn btn-primary btn-block" (click)="openModal(modal, { centered: true }); saveForm();">
                     Guardar
                 </button>
             </div>
@@ -71,9 +67,7 @@
 
                     <ul *ngFor="let m of matches" class="list-group">
                         <li class="list-group-item item mb-2 pt-0 pb-0">
-                            <button [disabled]="selectedMatchId === m.id"
-                                (click)="addList($event, m, codeTemplate); modalService.open(modal, { centered: true });"
-                                class="btn btn-success btn-sm float-left mt-2" type="button">
+                            <button [disabled]="selectedMatchId === m.id" (click)="openModal(modal, { centered: true }); addList($event, m, codeTemplate)" class="btn btn-success btn-sm float-left mt-2" type="button">
                                 Seleccionar
                             </button>
                             <div class="form-inline float-right pt-0">

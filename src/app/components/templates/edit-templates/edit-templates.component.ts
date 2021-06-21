@@ -86,14 +86,11 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
 
     private getTemplate(): void {
         this.templatesService.getTemplateByCode(this.codeTemplate).pipe(first()).subscribe(
-            res => {
+            res => {                
                 this.template = res[0]
                 this.mvp.setValue(this.template.mvp);
                 this.maximumScorer.setValue(this.template.maximumScorer);
-                // ToDo: no se actualiza la vista del input pero si su valor - refactor
-                this.champion.setValue(this.template.championName);
-                this.champion.updateValueAndValidity();
-                // ----------------------------------
+                this.champion.setValue(this.template.championId);
             },
             error => {
                 console.log(error)
@@ -131,7 +128,7 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
     private getTeams() {
         let idList = [];
         this.clubsAndCountries = [];
-
+        
         this.templateMatches.forEach((m: SingleMatch) => {
             if(!idList.includes(m.homeTeamId)) {
                 idList.push(m.homeTeamId);
@@ -139,11 +136,11 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
 
             if(!idList.includes(m.visitTeamId)) {
                 idList.push(m.visitTeamId)
-            }
+            }            
         });
-
+        
         this.clubsService.getClubs()
-        .pipe(first())
+        .pipe(takeUntil(this.unsubscribe$))
         .subscribe(
             res => {
                 res.forEach(c => {
@@ -154,15 +151,15 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
         });
 
         this.countriesService.getCountries()
-        .pipe(first())
+        .pipe(takeUntil(this.unsubscribe$))
         .subscribe(
             res => {
                 res.forEach(c => {
                     if(idList.includes(c.id)) {
                         this.clubsAndCountries.push(c);
                     }
-                })
-            })
+                });
+            });
     }
 
     // tslint:disable-next-line:typedef
@@ -314,7 +311,6 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
                 relatedParticipant[indexToUpdate].place = '';
             }
             await this.participantsService.update(relatedParticipant[indexToUpdate]);
-            //ToDo: eliminar o pasar a otro estado y luego al agregar el partido, recuperar?
             this.gambleService.deleteGamble(gamble.id);
         });
     }
@@ -324,7 +320,12 @@ export class EditTemplatesComponent implements OnInit, OnDestroy {
             this.templatesService.updateMvp(this.template.id, this.mvp.value);
             this.templatesService.updateMaximumScorer(this.template.id, this.maximumScorer.value);
             this.templatesService.updateChampion(this.template.id, this.clubsAndCountries.find(c => c.id === this.champion.value));
+            this.modalService.dismissAll('Cross click');
         }
+    }
+
+    openModal(modal, position): void {
+        this.modalService.open(modal, position);
     }
 
     get maximumScorer(): AbstractControl {
